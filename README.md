@@ -7,7 +7,7 @@ like League of Legends, Dota 2 and Heroes of the Storm with the same input as a 
 
 # Demo
 ##26.10.2017
-https://www.youtube.com/edit?o=U&video_id=iJSQLHRssiI
+https://youtu.be/iJSQLHRssiI
 So far the bot can detect itself in the game. Around its position a grid is established with each cell representing a state in which the player could be. So far the selection of the next state to move to is hard coded. The player just moves to the top right state all the time. This results in the bot moving to the top right corner of the map where the enemy nexus is.
 
 
