@@ -7,10 +7,13 @@ like League of Legends, Dota 2 and Heroes of the Storm with the same input as a 
 
 # History
 ## TODO
-- Implement policy finding
+- Implement decision making which task to do: Attack enemy, Reposition or lasthit minion
+- Implement policy finding 
 - Some ideas for algorithms to improve detection and prevent miss detections
-  - save position of character and if huge jumps in position happen there was probably a miss detection.
-  - lock camera on character and limit the area in which image recognition for the player character is executed (might also improve performance since the array of input pixels is smaller then)
+  - save position of character and if huge jumps in position happen there was probably a miss detection -> not necessary thanks to incredible tensorflow detection performance
+
+## 13.11.2017
+Testing of an improved model which can now detect the player champion, enemy minions and enemy towers. The resulting accuracy was surprisingly high. The champion and towers are detected with accuracies of over 90% and minions are even detected when overlaping with other minions. I guess it was worth it to spend 2 days recording and labeling 600 pictures as a training set...
 ## 4.11.2017
 Taking more pictures of the player character in more situations to improve detection performance. Also starting to train the model to recognize enemy minions. Took about 350 images of the player character and 200 of enemy minions.
 ## 26.10.2017
