@@ -13,10 +13,10 @@ like League of Legends, Dota 2 and Heroes of the Storm with the same input as a 
 
 # History
 ## TODO
-- Implement decision making which task to do: Attack enemy, Reposition or lasthit minion
-- Implement policy finding 
-- Some ideas for algorithms to improve detection and prevent miss detections
-  - save position of character and if huge jumps in position happen there was probably a miss detection -> not necessary thanks to incredible tensorflow detection performance
+- Implement Decision making algorithm
+- Make new demo video and update demo pictures
+- Update report with newest progress
+- Improve performance (or buy new computer $$$)
 ## 22.11.2017
 Planned how to implement the decision making. It will be based on a few parameters and also factor in the distance to the closest enemy tower into its decision making. Also it is required to know how much hp the player character has as a measure of "reward" for an action.
 Therefore a function to determine the percent of HP the player character has was implemented counting the green/non-green pixels of the health bar in the HUD.
