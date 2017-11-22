@@ -17,6 +17,12 @@ like League of Legends, Dota 2 and Heroes of the Storm with the same input as a 
 - Implement policy finding 
 - Some ideas for algorithms to improve detection and prevent miss detections
   - save position of character and if huge jumps in position happen there was probably a miss detection -> not necessary thanks to incredible tensorflow detection performance
+## 22.11.2017
+Planned how to implement the decision making. It will be based on a few parameters and also factor in the distance to the closest enemy tower into its decision making. Also it is required to know how much hp the player character has as a measure of "reward" for an action.
+Therefore a function to determine the percent of HP the player character has was implemented counting the green/non-green pixels of the health bar in the HUD.
+## 20.11.2017
+Added a hardcoded logic to make decisions (attack, reposition, approach enemy, and move to enemy base) based on the distance to the closest enemy. If an enemy is too close reposition and if its to far approach it. If it is in attakc range and not to close attack the enemy.
+The results were quite good and the agent is keeping a safe distance to enemies and attacks them when possible. The additional calculations drain my notebooks resources and the calculation algorithm just performs every 1.5 seconds which is barely enough to react fast to changes in the game. Better hardware and using GPU acceleration would be necessary.
 ## 14.11.2017
 Wrote new helper functions to also generate a precise x|y position of minions. These positions are then used to find out in which state of the discretized enviornment they are. Next step implement decision making based on the state matrix, generating a matrix containing the rewards and implement the Markovian Process for determining the best action to take
 ## 13.11.2017
