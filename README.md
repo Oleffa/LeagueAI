@@ -1,17 +1,17 @@
 # LeagueAI
-Imlementation of an A.I. Player for the videogame League of Legends based on Image Recognition, Discretization and Monte Carlo Policy Evaluation
-
-LeagueAI View:
-![Game View](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/002_LeagueAI.JPG)
-![Game View](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/001_LeagueAI.jpg)
-
-Game View:
-![Game View](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/002_game.JPG)
-![Game View](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/001_game.jpg)
+Imlementation of an A.I. Player for the videogame League of Legends based on Image Recognition using TensorFlow, OpenCV, Discretization and Gradient Optimization.
 
 # Abstract
 The task is to create an agent that is able to play 3rd person massive multiplayer online battle arena games (MOBA)
-like League of Legends, Dota 2 and Heroes of the Storm with the same input as a human player. Image recognition is used to detect objects in the game environment. The environment is then discretized by dividing the screen content in a grid. The grid contains information for the agent like rewards and obstacles. With these informations an implementation of the Monte-Carlo Policy Evaluation is used to determine which area of the screen has to be clicked or how the agent has to position in order to get a maximum reward that leads to winning the game.
+like League of Legends, Dota 2 and Heroes of the Storm with the same input as a human player. Image recognition is used to detect objects in the game environment. Currently the TensorFlow object detection is able to detect the player Character (Vayne), enemy minions and enemy towers. The green grid is a representation of the discretized game environment with each square representing a state. States that contain objects are colored differently. For example a state that contains a minion is marked with a blue rectangle and a tower with a white one. Sample between Game view and the AI's view:
+![AI_002](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/002_LeagueAI.JPG)
+![Game_002](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/002_game.jpg)
+
+Tower Recognition:
+![AI_001](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/001_LeagueAI.JPG)
+![Game_001](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/001_game.jpg)
+
+These informations allow us to calculate an action like attack a certain state, run away from a threat in a state like a tower or approach enemies. This is done using gradient optimization. Based on the loss or gain of the players HP, the number of attacks executed and the time we survived so far we then calculate a reward which is fed back to the system to improve the decision making while playing.
 
 # History
 ## TODO
@@ -19,6 +19,11 @@ like League of Legends, Dota 2 and Heroes of the Storm with the same input as a 
 - Make new demo video and update demo pictures
 - Update report with newest progress
 - Improve performance (or buy new computer $$$)
+
+## 26.11.2017
+Implemented a function to calculate rewards based on player HP, number of attacks executed in a certain time frame as well as the time the agent survived so far.
+Implemented functions to determine a threat level from certain game objects. This info will be used by the gradient optimization in the future.
+
 ## 22.11.2017
 Planned how to implement the decision making. It will be based on a few parameters and also factor in the distance to the closest enemy tower into its decision making. Also it is required to know how much hp the player character has as a measure of "reward" for an action.
 Therefore a function to determine the percent of HP the player character has was implemented counting the green/non-green pixels of the health bar in the HUD.
