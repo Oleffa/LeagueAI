@@ -2,10 +2,12 @@
 Imlementation of an A.I. Player for the videogame League of Legends based on Image Recognition, Discretization and Monte Carlo Policy Evaluation
 
 LeagueAI View:
-![Game View](https://github.com/Oleffa/LeagueAI/blob/master/002.png)
+![Game View](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/002_LeagueAI.JPG)
+![Game View](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/001_LeagueAI.jpg)
 
 Game View:
-![Game View](https://github.com/Oleffa/LeagueAI/blob/master/001.png)
+![Game View](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/002_game.JPG)
+![Game View](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/001_game.jpg)
 
 # Abstract
 The task is to create an agent that is able to play 3rd person massive multiplayer online battle arena games (MOBA)
