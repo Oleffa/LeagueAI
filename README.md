@@ -1,5 +1,7 @@
 # LeagueAI
-Imlementation of an A.I. Player for the videogame League of Legends based on Image Recognition using TensorFlow, OpenCV, Discretization and Gradient Optimization.
+Implementation of an A.I. Player for the videogame League of Legends based on Image Recognition using TensorFlow, OpenCV, Discretization and Gradient Optimization. 
+
+Demo video: https://www.youtube.com/watch?v=KRWFCaXfOTk
 
 # Abstract
 The task is to create an agent that is able to play 3rd person massive multiplayer online battle arena games (MOBA)
@@ -11,14 +13,22 @@ Tower Recognition:
 ![AI_001](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/001_LeagueAI.JPG)
 ![Game_001](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/001_game.jpg)
 
-These informations allow us to calculate an action like attack a certain state, run away from a threat in a state like a tower or approach enemies. This is done using gradient optimization. Based on the loss or gain of the players HP, the number of attacks executed and the time we survived so far we then calculate a reward which is fed back to the system to improve the decision making while playing.
+These informations allow us to calculate an action like attack a certain state, run away from a threat in a state like a tower or approach enemies. This is done using gradient optimization on a custom policy. Based on the loss or gain of the players HP, the number of attacks executed and the time we survived so far we then calculate a reward which is fed back to the system to improve the decision making while playing.
 
 # History
 ## TODO
-- Implement Decision making algorithm
-- Make new demo video and update demo pictures
-- Update report with newest progress
+- Teach more objects to the model
+- Add more interactions between game objects (make decisions based on more factors than just distance to each other and own hp)
 - Improve performance (or buy new computer $$$)
+- React to getting stuck by recalling and moving back to lane -> Allows the bot to play games completely on its own
+
+## 2.12.2017-4.12.2017
+Finalizing the system to a state that can be presented.
+- Implemented policy finding
+- Improved reward calculation and learning
+- Added mode to move autonomously to lane and wait for minions
+- Tried to implement abilites and a recall function but failed due to problems with win32api and keystroke/mouse actions sending to the HUD (apparently it has something to do with the drivers and that python generated key events are different than events created by actual hardware)
+
 
 ## 26.11.2017
 Implemented a function to calculate rewards based on player HP, number of attacks executed in a certain time frame as well as the time the agent survived so far.
