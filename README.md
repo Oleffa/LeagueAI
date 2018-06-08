@@ -15,7 +15,7 @@ Tower Recognition:
 
 These informations allow us to calculate an action like attack a certain state, run away from a threat in a state like a tower or approach enemies. This is done using gradient optimization on a custom policy. Based on the loss or gain of the players HP, the number of attacks executed and the time we survived so far we then calculate a reward which is fed back to the system to improve the decision making while playing.
 
-# Installtion
+# Installation
 1. Clone the repository
 2. Install all dependencies (requires tensorflow and a powerfull machine)
 3. Download the model (https://github.com/Oleffa/LeagueAI/blob/master/LeagueAI_v3.zip) to detect enemy minions, the champion vayne and enemy towers (if you want the labeled images contact me)
