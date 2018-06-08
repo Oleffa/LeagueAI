@@ -19,7 +19,6 @@ from collections import defaultdict
 from io import StringIO
 from matplotlib import pyplot as plt
 from PIL import Image
-#from PIL import ImageGrab
 import cv2
 import time
 from mss import mss
@@ -51,16 +50,14 @@ from utils import visualization_utils as vis_util
 # In[ ]:
 
 
-#Select model in the same folder as this script
+#Select object detection model from the same folder as this script
 MODEL_NAME = 'LeagueAI_v3'
 MODEL_FILE = MODEL_NAME + '.tar.gz'
-#DOWNLOAD_BASE = 'http://download.tensorflow.org/models/object_detection/'
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
 PATH_TO_CKPT = MODEL_NAME + '/frozen_inference_graph.pb'
-
 # List of the strings that is used to add correct label for each box.
 PATH_TO_LABELS = os.path.join('training', 'LeagueAI_v2.pbtxt')
-
+# Number of classes in the pbtxt file that can be detected by the model
 NUM_CLASSES = 3
 
 
@@ -90,17 +87,12 @@ category_index = label_map_util.create_category_index(categories)
 
 # ## Helper code
 
-# In[ ]:
-
-
-## Other
-
+# Helper classes for various champion functions and interaction with the game
 
 # In[ ]:
 
 
-## Champion helper classes
-# click a postion in the screen using x,y coordinates
+# click a postion in the screen using x,y coordinates in pixels
 def click(x,y, attack):
     win32api.SetCursorPos((x,y))
     if attack == True:
@@ -109,16 +101,20 @@ def click(x,y, attack):
     else:
         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN,x,y,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP,x,y,0,0)
+# move the mouse cursor to x,y coordinates in pixels
 def move_cursor_to(x,y):
     win32api.SetCursorPos((x,y))
 # find the player character position marked as x,y (converting the boxes to a single point position)
+# some hard coded things are done here: the character model center is not in the center of the detection
+# but in the lower part near its feet. Thats why we determined some factors for calculating the position
+# from the box experimentally
 def find_box_xy(box):
     playerwidth =  (box[3] - box[1])
     playerheight = box[2] - box[0]
     playerpos_y = (box[0] + playerheight/1.3)
     playerpos_x = (box[1] + playerwidth/2)
     return([playerpos_y, playerpos_x, playerheight, playerwidth])
-# find out in which state on object is
+# find out in which grid zell on object is
 def find_object_state(grid, minion_origin, player_origin, grid_width, grid_height):
     x_object = (minion_origin[0])#/MONITOR_WIDTH)#*SCREEN_WIDTH
     y_object = (minion_origin[1])#/MONITOR_HEIGHT)#*SCREEN_HEIGHT
@@ -131,13 +127,14 @@ def find_object_state(grid, minion_origin, player_origin, grid_width, grid_heigh
     state_x = round(x_dif/grid_width)
     state_y = round(y_dif/grid_height)
     return([state_x, state_y])
-# click a certain state given by x and y coordinate in the state grid
+# click a certain grid cell given by x and y coordinate in the state grid
+# the click will click in the center of the grid
 def click_state(state_x, state_y, state_width, state_height, player_origin, attack):
     x_click = (player_origin[0]/MONITOR_WIDTH)*SCREEN_WIDTH + state_x*(state_width/MONITOR_WIDTH)*SCREEN_WIDTH
     y_click = (player_origin[1]/MONITOR_HEIGHT)*SCREEN_HEIGHT + (-1*state_y*(state_height/MONITOR_HEIGHT)*SCREEN_HEIGHT)
     click(int(x_click), int(y_click), attack)
     #move_cursor_to(int(x_click), int(y_click))
-# set a certain state in the grid to a certain value to mark for example the type of unit in the state
+# set a certain state in the grid to a certain value to mark for example the type of unit in the grid cell
 def set_array_pos(grid, x, y_in, value, x_grid_size_in, y_grid_size_in):
     y = y_in*(-1)
     # make sure that we do not overwrite the state of our player character in the grid
@@ -157,8 +154,9 @@ def set_array_pos(grid, x, y_in, value, x_grid_size_in, y_grid_size_in):
     grid[x_pos][y_pos] = value    
     return grid
 
-#the teleport and recall functions dont work because it is not possible to send button presses and klicks on the hud to the game
-#the win32api does work on another driver level than the game
+# the teleport and recall functions dont work because it is not possible to send button presses and klicks
+# on the hud to the game
+# the win32api does work on another driver level than the game
 
 def teleport_to(screen_x, screen_y):
     #press shift+s and klick a coordinate
@@ -184,13 +182,16 @@ def recall():
 
 
 class Policy:
-    
+    # The policy cointains the parameters used for making decisions and learning
+    # More on the paramters can be found int the pdf report in chapter 4
     c_max_visible_dist = 20.0
     c_close_dist_cutoff = 1.0 / 10.0
     c_tower_safe_dist_cutoff = c_max_visible_dist / 3
     c_max_hp = 1
-    #this parameter sets the time frame the bot should leave the base and go to lane
-    c_game_time_beginning_cutoff = 0  #TODO set time in seconds until the normal game routine starts  #0.5 *60 / 5
+    # this parameter sets the time frame the bot should leave the base and go to lane
+    # this paramtere requires some further testing. the bot is not really smart enough yet to know where to go
+    # when the game starts. thats why the move to lane is hard coded and does not use this parameter for now
+    c_game_time_beginning_cutoff = 0  # set time in seconds until the normal game routine starts  #0.5 *60 / 5
     policy_gradient = np.array([1, 1, 1, 1]).reshape( -1 )
     delta_theta = []
     delta_R = []
@@ -200,11 +201,10 @@ class Policy:
     
     logistic_func_x_scale = 6
     
-    # theta for the action:
+    # theta is the policy parameter we learn for the different actions:
     # atk minion, atk tower, move to goal, retreat
-    # respectively
     theta = np.zeros( (4,1) )
-    #old values
+    #other initial values for the parameters
     #theta[0] = c_close_dist_cutoff
     #theta[1] = 1
     #theta[2] = 0.8 / (35*60/5)
@@ -214,16 +214,16 @@ class Policy:
     theta[2] = 1
     theta[3] = 1
 class State:
-    
+    # This class defines the state in which the player is currently
     hp = 1.0
-    
     cloest_minion_dist = 0
     tower_dist = 0
-    
     # game time counted in iterations or steps
     start_time = time.time()
     game_time = time.time() - start_time
 
+
+# More on how the learning and decision making works can be found in the pdf report in the repository in chapter 4.5
 
 # In[ ]:
 
@@ -360,7 +360,8 @@ def perturbate_policy(delta_scale=1.0):
 
 
 #=======move to lane code=====
-time.sleep(5)
+# hard coded behaviour to move to the middle lane and wait until the game begins
+
 #sct.get_pixels(mon)
 #screen = Image.frombytes('RGB', (sct.width, sct.height), sct.image)
 #screen = np.array(screen)
@@ -374,23 +375,27 @@ time.sleep(5)
 #print("wait for battle to begin")
 #time.sleep(55)
 #================================
+time.sleep(5)
 
-#Init variables
+# variable to track when we found the champion for the last time. so if the champion moves to a spot where it is
+# not visible anymore it will move randomly until found again. or recall (if it would work ....)
 vayne_last_found = time.time()
+# Parameters for the rewards
 MINION_REWARD = 10
 TOWER_REWARD = -100
 BLOCKED = -999
 policy = Policy()
 state = State()
+# Initialize the rewards for 1 and 5 seconds average
 reward_1 = 0
 reward_5 = 0
 state.start_time = time.time()
 
-#game start stuff
+# game start stuff
 start = False
 start_time = time.time()
 
-#reset variables for dicision making
+# reset variables for decision making and reward calculation
 last_player_hp = 1
 attack_number_1 = 0
 attack_number_5 = 0
@@ -402,11 +407,14 @@ tick_count_1 = 0
 tick_count_5 = 0
 game_start = time.time()
 
+# sct is used to get the pixels from the desktop
 sct = mss()
 # determine the size of the area to observe (the game)
+# mon = {'top': 0, 'left': 0, 'width': SCREEN_WIDTH, 'height': SCREEN_HEIGHT} for fullscreen
 mon = {'top': 0, 'left': 0, 'width': SCREEN_WIDTH, 'height': SCREEN_HEIGHT}
 # timer to see how fast the loop is running
 last_time = time.time()
+
 
 #fill the delta theta with values or else there is an error
 #delta_theta_i = perturbate_policy()
@@ -414,9 +422,6 @@ last_time = time.time()
 
 
 print("theta0_minion;theta1_tower;theta2_approach;theta3_retreat")
-#time.sleep(5)
-#teleport_to(1263,670)
-#time.sleep(3)
 
 
 
@@ -425,8 +430,9 @@ with detection_graph.as_default():
     while True:
       #print('=========Loop took: {} seconds'.format(time.time()-last_time))
       last_time = time.time()
-      ##update gametime
+      # update gametime
       state.game_time = time.time() - state.start_time
+      # replaced by mss package
       #screen = cv2.resize(grab_screen(region=(0,40,1024,768)), (800,450))
       #screen = np.array(ImageGrab.grab(bbox=(0,40,1024,768)))
       # get screen recording and resize it to 800x450 pixels for output
@@ -435,7 +441,7 @@ with detection_graph.as_default():
       screen = np.array(screen)
       screen = cv2.resize(screen, (MONITOR_WIDTH, MONITOR_HEIGHT))
       image_np = screen
-      # ===================tensorflow code===============
+      # ===================tensorflow template code===============
       # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
       image_np_expanded = np.expand_dims(image_np, axis=0)
       image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
@@ -449,9 +455,7 @@ with detection_graph.as_default():
       # Actual detection.
       (boxes, scores, classes, num_detections) = sess.run(
           [boxes, scores, classes, num_detections],
-          feed_dict={image_tensor: image_np_expanded})                  
-      
-      # ====================================================  
+          feed_dict={image_tensor: image_np_expanded})                   
       # Visualization of the results of a detection
       vis_util.visualize_boxes_and_labels_on_image_array(
           image_np,
@@ -465,14 +469,16 @@ with detection_graph.as_default():
 
       #===================Player Character=======================
       # detect hp:
+      # read the number of green vs non green pixels from the health bar (hard coded for )
       hp_y_min = 572
       hp_y_max = hp_y_min + 8
-      hp_x_min = int(MONITOR_WIDTH/2-115) #int(MONITOR_WIDTH/2-120)
+      hp_x_min = int(MONITOR_WIDTH/2-115)
       hp_x_max = int(MONITOR_WIDTH/2+56)  
+      # print the dimensions and positions of the square for debuging purpsoes
       #print(image_np[hp_y_min][hp_x_min])
       #print(image_np[hp_y_max][hp_x_max])
+      #rectangle indicator to see the region where the hp are read from
       cv2.rectangle(image_np, (hp_x_min, hp_y_min),(hp_x_max,hp_y_max),(0, 0, 255), 1)
-      #cv2.circle(image_np,(hp_x_min, hp_y_min), 2, (0,100,100),1)  
       green_pixels = 0
       for x_hp in range(hp_x_min,hp_x_max,1):
             for y_hp in range(hp_y_min,hp_y_max,1):
@@ -481,13 +487,16 @@ with detection_graph.as_default():
       #print("Player HP: " + str(green_pixels/((hp_x_max-hp_x_min-1)*(hp_y_max-hp_y_min-1))))
       playerHP = green_pixels/((hp_x_max-hp_x_min-1)*(hp_y_max-hp_y_min-1))
     
-      #Other variables
-      gameover = False
-      vayne_found = False
-      minion_count = 0
-      tower_count = 0
+      # reset various game variables
+      gameover = False # did the player die?
+      vayne_found = False # did we found the player character?
+      minion_count = 0 # how many enemy minions have been detected
+      tower_count = 0 # how many towers are around?
       try:
           if vayne_last_found + 10 < time.time():
+              # recall if the hap are low and then move back to lane
+              # unfortunately the recall function is not working so we just click randomly until we find the
+              # the player character again
               #if playerHP <= 0.15:
                   #recall to make sure we are in base then, doesnt work because i cant sent keystrokes or hud clicks ....
                   #recall()
@@ -507,8 +516,8 @@ with detection_graph.as_default():
                   vayne_found = True;
                   vayne_last_found = time.time()
                   player_position = find_box_xy(boxes[0][i])
-                  #click(int(player_position[1]*SCREEN_WIDTH), int(player_position[0]*SCREEN_HEIGHT))
-                  #draw a circle where the character is
+                  # draw a circle where the center of the player character is (not the center of the rectangle
+                  # but some arbitrary spot between the legs of the model that was found experimentally)
                   player_origin = [int(player_position[1]*MONITOR_WIDTH), int(player_position[0]*MONITOR_HEIGHT)]
                   cv2.circle(image_np, (player_origin[0], player_origin[1]), 2, (0, 0, 255), 2)
                   #calculate the origin of the center rectangle under the character
@@ -546,7 +555,8 @@ with detection_graph.as_default():
                               unit_grid = set_array_pos(unit_grid,cur_tower_state[0],cur_tower_state[1],3,grid_x,grid_y)                 
 
                   #=============================
-                  #Visualize Objects and generate reward matrix#
+                  # Visualize Objects and generate reward matrix (each cell contains a certain reward)
+                  # not really needed anymore but the code is still used to draw the objects in the grid
                   dim = (grid_x,grid_y)
                   reward_grid = np.zeros(dim)
                   for x in range(len(unit_grid)):
@@ -571,8 +581,7 @@ with detection_graph.as_default():
                               cv2.rectangle(image_np,(origin[0]+w*x-int(grid_x/2)*w, origin[1]+h*y-int(grid_y/2)*h),(origin[2]+w*x-int(grid_x/2)*w, origin[3]+h*y-int(grid_y/2)*h), (0, 255, 0), 1)
 
 
-                  #=======Hard Coded Decision Making========
-                  #print(shortest_distance)
+                  #=======Hard Coded Decision Making/Outdated========
                   #if shortest_distance <= 5.0:
                   #      #print('too close! run!')
                   #      cv2.rectangle(image_np,(0,0), (w*5,h*5), (0, 255, 0), -1)
@@ -580,9 +589,9 @@ with detection_graph.as_default():
                   #          click_state(-closest_x/abs(closest_x), -closest_y/abs(closest_y),w,h,player_origin,False)
                   #elif shortest_distance < 8.0 and shortest_distance > 5.0:
                   #      #print('attack!')
-                   #     cv2.rectangle(image_np,(0,0), (w*3,h*3), (0, 0, 255), -1)
-                   #     click_state(closest_x, closest_y,w,h,player_origin,True)
-                   ##     time.sleep(1)
+                  #      cv2.rectangle(image_np,(0,0), (w*3,h*3), (0, 0, 255), -1)
+                  #      click_state(closest_x, closest_y,w,h,player_origin,True)
+                  #      time.sleep(1)
                   #elif shortest_distance > 8.0 and minion_count > 0:
                   #      cv2.rectangle(image_np,(0,0), (w*3,h*3), (255, 0, 0), -1)
                   #      #print('not in range, approaching!')
@@ -599,6 +608,7 @@ with detection_graph.as_default():
                   [shortest_distance_tower, closest_tower_x, closest_tower_y] = find_shortest_distance(unit_grid, 3)
                   #shortest_distance_tower = shortest_distance_tower/math.sqrt(math.pow((grid_x/2),2)+math.pow((grid_y/2),2))
                   #print("closest minion" + str(shortest_distance_minion))
+                  # calculate probabilites for each action
                   attack_tower_prob = tower_probability(shortest_distance_tower, playerHP)
                   approach_enemy_base_prob =  goal_probability()
                   retreat_prob = retreat_probability(shortest_distance_minion, playerHP)
@@ -640,6 +650,7 @@ with detection_graph.as_default():
                           click_state(2*(-closest_minion_x/abs(closest_minion_x)), 2*(-closest_minion_y/abs(closest_minion_y)), w, h, player_origin, False);
 
                   #======Calculate Reward and feed it back======
+                  # This part of the algorithm is roughly described in the pdf report in chapter 4.5
                   hp_change_1 = hp_change_1 + (- playerHP + last_player_hp) #add up the hp change until reset
                   hp_change_5 = hp_change_5 +  (- playerHP + last_player_hp)
                   tick_count_1 = tick_count_1 + 1
@@ -709,4 +720,42 @@ with detection_graph.as_default():
           print('gameover')
           cv2.destroyAllWindows()
           break;
+
+
+# In[ ]:
+
+
+#plot test for plotting thetas continuously for learning monitoring
+
+#import matplotlib.pylab as pylab
+#%matplotlib notebook
+#def update_line(hl,x,p):
+#    hl.set_xdata(x)
+#    hl.set_ydata(p)
+#    plt.draw()
+#    plt.flush_events()
+#x = np.arange(-6,6,0.1)
+#playerHP_plot = 1
+#thet = 1##
+#
+##fig=plt.figure()
+#plt.show()
+#for i in range(1,10):
+#    p2 = i*playerHP_plot*(1/(1+np.exp(-2*(x+1)))-1/(1+np.exp(-10*(x-3))))
+#    plt.plot(x,p2)
+#    plt.draw()
+ ##   fig.canvas.flush_events()
+ #   time.sleep(1)
+    #plt.gcf().clear()
+    
+    
+    
+
+#while True:
+#    p = np.exp(x)#policy.theta[1]*playerHP_plot*(1/(1+np.exp(-2*(x+1)))-1/(1+np.exp(-10*(x-3))))
+#    t, = pylab.plot(x,p)
+#    time.sleep(1)
+#    thet = 1
+#    plt.show()
+#p = policy.theta[1]*playerHP*(1/( 1+exp( -2*(x+1)) ) - 1/( 1+exp( -10*(x-3)) ) )
 
