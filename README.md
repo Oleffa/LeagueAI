@@ -15,12 +15,23 @@ Tower Recognition:
 
 These informations allow us to calculate an action like attack a certain state, run away from a threat in a state like a tower or approach enemies. This is done using gradient optimization on a custom policy. Based on the loss or gain of the players HP, the number of attacks executed and the time we survived so far we then calculate a reward which is fed back to the system to improve the decision making while playing.
 
-# History
-## TODO
+# Installtion
+1. Clone the repository
+2. Install all dependencies (requires tensorflow and a powerfull machine)
+3. Download the model (https://github.com/Oleffa/LeagueAI/blob/master/LeagueAI_v3.zip) to detect enemy minions, the champion vayne and enemy towers (if you want the labeled images contact me)
+4. Run it!
+
+More info: https://github.com/Oleffa/LeagueAI/issues/1
+
+A tutorial that can help you getting started with the tensorflow object detection API: https://pythonprogramming.net/introduction-use-tensorflow-object-detection-api-tutorial/
+
+# TODO
 - Teach more objects to the model
 - Add more interactions between game objects (make decisions based on more factors than just distance to each other and own hp)
 - Improve performance (or buy new computer $$$)
 - React to getting stuck by recalling and moving back to lane -> Allows the bot to play games completely on its own
+
+# History
 
 ## 2.12.2017-4.12.2017
 Finalizing the system to a state that can be presented.
