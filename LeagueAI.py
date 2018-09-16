@@ -1,11 +1,3 @@
-
-# coding: utf-8
-
-# # Imports and environment setup
-
-# In[ ]:
-
-
 import matplotlib
 #matplotlib.use("Qt5Agg")
 import numpy as np
@@ -17,7 +9,6 @@ import tensorflow as tf
 import zipfile
 from collections import defaultdict
 from io import StringIO
-from matplotlib import pyplot as plt
 from PIL import Image
 import cv2
 import time
@@ -27,8 +18,6 @@ from math import exp
 from random import randint
 from random import random
 from numpy.linalg import inv
-
-
 
 #mouse control and window dimensions
 SCREEN_WIDTH = 1366
@@ -47,9 +36,6 @@ from utils import visualization_utils as vis_util
 
 # # Load Model
 
-# In[ ]:
-
-
 #Select object detection model from the same folder as this script
 MODEL_NAME = 'LeagueAI_v3'
 MODEL_FILE = MODEL_NAME + '.tar.gz'
@@ -63,9 +49,6 @@ NUM_CLASSES = 3
 
 # ## Load the frozen model into memory
 
-# In[ ]:
-
-
 detection_graph = tf.Graph()
 with detection_graph.as_default():
   od_graph_def = tf.GraphDef()
@@ -77,8 +60,6 @@ with detection_graph.as_default():
 
 # ## Loading label map
 
-# In[ ]:
-
 
 label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
@@ -88,9 +69,6 @@ category_index = label_map_util.create_category_index(categories)
 # ## Helper code
 
 # Helper classes for various champion functions and interaction with the game
-
-# In[ ]:
-
 
 # click a postion in the screen using x,y coordinates in pixels
 def click(x,y, attack):
@@ -177,10 +155,6 @@ def recall():
     win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEUP,920,720,0,0)
     #click(920,728 ,True)
 
-
-# In[ ]:
-
-
 class Policy:
     # The policy cointains the parameters used for making decisions and learning
     # More on the paramters can be found int the pdf report in chapter 4
@@ -224,10 +198,6 @@ class State:
 
 
 # More on how the learning and decision making works can be found in the pdf report in the repository in chapter 4.5
-
-# In[ ]:
-
-
 ## Intelligence
 def find_shortest_distance(unit_grid, unit_type):
     distance = 10000 #no distance found
@@ -348,15 +318,11 @@ def estimate_policy_gradient_FD():
 
 def perturbate_policy(delta_scale=1.0):
     factor = np.random.random(4)*delta_scale
-    delta_theta_i = factor * np.array(policy.theta).reshape(4)
+    delta_theta_i = f
+    actor * np.array(policy.theta).reshape(4)
     return delta_theta_i.tolist()
 
-    
-
-
-# ## Main Routine
-
-# In[ ]:
+# Main Routine
 
 
 #=======move to lane code=====
@@ -720,42 +686,3 @@ with detection_graph.as_default():
           print('gameover')
           cv2.destroyAllWindows()
           break;
-
-
-# In[ ]:
-
-
-#plot test for plotting thetas continuously for learning monitoring
-
-#import matplotlib.pylab as pylab
-#%matplotlib notebook
-#def update_line(hl,x,p):
-#    hl.set_xdata(x)
-#    hl.set_ydata(p)
-#    plt.draw()
-#    plt.flush_events()
-#x = np.arange(-6,6,0.1)
-#playerHP_plot = 1
-#thet = 1##
-#
-##fig=plt.figure()
-#plt.show()
-#for i in range(1,10):
-#    p2 = i*playerHP_plot*(1/(1+np.exp(-2*(x+1)))-1/(1+np.exp(-10*(x-3))))
-#    plt.plot(x,p2)
-#    plt.draw()
- ##   fig.canvas.flush_events()
- #   time.sleep(1)
-    #plt.gcf().clear()
-    
-    
-    
-
-#while True:
-#    p = np.exp(x)#policy.theta[1]*playerHP_plot*(1/(1+np.exp(-2*(x+1)))-1/(1+np.exp(-10*(x-3))))
-#    t, = pylab.plot(x,p)
-#    time.sleep(1)
-#    thet = 1
-#    plt.show()
-#p = policy.theta[1]*playerHP*(1/( 1+exp( -2*(x+1)) ) - 1/( 1+exp( -10*(x-3)) ) )
-
