@@ -1,5 +1,3 @@
-import matplotlib
-#matplotlib.use("Qt5Agg")
 import numpy as np
 import os
 import six.moves.urllib as urllib
