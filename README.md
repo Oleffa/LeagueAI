@@ -18,7 +18,7 @@ These informations allow us to calculate an action like attack a certain state, 
 # Installation
 1. Clone the repository
 2. Install all dependencies (requires tensorflow and a powerfull machine)
-3. Download the model (https://github.com/Oleffa/LeagueAI/blob/master/LeagueAI_v3.zip) to detect enemy minions, the champion vayne and enemy towers (if you want the labeled images contact me)
+3. Unpack the model (https://github.com/Oleffa/LeagueAI/blob/master/LeagueAI_v3.zip) to detect enemy minions, the champion vayne and enemy towers (if you want the labeled images contact me)
 4. Run it!
 
 More info: https://github.com/Oleffa/LeagueAI/issues/1
