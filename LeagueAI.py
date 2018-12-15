@@ -40,7 +40,7 @@ MODEL_FILE = MODEL_NAME + '.tar.gz'
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
 PATH_TO_CKPT = MODEL_NAME + '/frozen_inference_graph.pb'
 # List of the strings that is used to add correct label for each box.
-PATH_TO_LABELS = os.path.join('training', 'LeagueAI_v2.pbtxt')
+PATH_TO_LABELS = os.path.join('training', 'LeagueAI_v3.pbtxt')
 # Number of classes in the pbtxt file that can be detected by the model
 NUM_CLASSES = 3
 
