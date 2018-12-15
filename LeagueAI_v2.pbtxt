@@ -1,0 +1,12 @@
+item {
+	id: 1
+	name: 'Vayne'
+}
+item {
+	id: 2
+	name: 'EnemyMinion'
+}
+item {
+	id: 3
+	name: 'Tower'
+}
