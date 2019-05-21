@@ -1,64 +1,86 @@
 # LeagueAI
-Implementation of an A.I. Player for the videogame League of Legends based on Image Recognition using TensorFlow, OpenCV, Discretization and Gradient Optimization. 
+Implementation of an A.I. Player for the videogame League of Legends based on Image Recognition using PyTorch
 
-Demo video: https://www.youtube.com/watch?v=KRWFCaXfOTk
+Demo video of Tensorflow implementation from 2017: https://www.youtube.com/watch?v=KRWFCaXfOTk
 
-# Abstract
-The task is to create an agent that is able to play 3rd person massive multiplayer online battle arena games (MOBA)
-like League of Legends, Dota 2 and Heroes of the Storm with the same input as a human player. Image recognition is used to detect objects in the game environment. Currently the TensorFlow object detection is able to detect the player Character (Vayne), enemy minions and enemy towers. The green grid is a representation of the discretized game environment with each square representing a state. States that contain objects are colored differently. For example a state that contains a minion is marked with a blue rectangle and a tower with a white one. Sample between Game view and the AI's view:
-![AI_002](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/002_LeagueAI.JPG)
-![Game_002](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/002_game.jpg)
+## TODO
+1) Dataset generation
+- Fix some bugs with the tower cropping of the raw data
+- Towers in fog of war
+- Turret plating
+- Fog of war strucutres, maybe fog of war filter?
+- Dead minions
+- Add random particles to the screenshots, explosions and so on
+- More different cursors
+- More cursors
+- health bars
+- Create real live test dataset with both vayne skins
+- Make new dataset with proper towers
+- Train a model with the old dataset
+- The map calculation is wrong i think, if it detects too much, then sometimes objects are used twice for map computation, does it make sense?
 
-Tower Recognition:
-![AI_001](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/001_LeagueAI.JPG)
-![Game_001](https://github.com/Oleffa/LeagueAI/blob/master/Pictures/001_game.jpg)
-
-These informations allow us to calculate an action like attack a certain state, run away from a threat in a state like a tower or approach enemies. This is done using gradient optimization on a custom policy. Based on the loss or gain of the players HP, the number of attacks executed and the time we survived so far we then calculate a reward which is fed back to the system to improve the decision making while playing.
-
-# Installation
-1. Clone the repository
-2. Install all dependencies (requires tensorflow and a powerfull machine)
-3. Unpack the model (https://github.com/Oleffa/LeagueAI/blob/master/LeagueAI_v3.zip) to detect enemy minions, the champion vayne and enemy towers (if you want the labeled images contact me)
-4. Run it!
-
-More info: https://github.com/Oleffa/LeagueAI/issues/1
-
-A tutorial that can help you getting started with the tensorflow object detection API: https://pythonprogramming.net/introduction-use-tensorflow-object-detection-api-tutorial/
-
-# TODO
-- Teach more objects to the model
-- Add more interactions between game objects (make decisions based on more factors than just distance to each other and own hp)
-- Improve performance (or buy new computer $$$)
-- React to getting stuck by recalling and moving back to lane -> Allows the bot to play games completely on its own
-
-# History
-
-## 2.12.2017-4.12.2017
-Finalizing the system to a state that can be presented.
-- Implemented policy finding
-- Improved reward calculation and learning
-- Added mode to move autonomously to lane and wait for minions
-- Tried to implement abilites and a recall function but failed due to problems with win32api and keystroke/mouse actions sending to the HUD (apparently it has something to do with the drivers and that python generated key events are different than events created by actual hardware)
+2) Long term goals:
+- Extract object positions from the minimap to get an understanding of the global map
 
 
-## 26.11.2017
-Implemented a function to calculate rewards based on player HP, number of attacks executed in a certain time frame as well as the time the agent survived so far.
-Implemented functions to determine a threat level from certain game objects. This info will be used by the gradient optimization in the future.
+## Currently Detectable Objects
+- Red Tower
+- Red Canon Minion
+- Red Caster Minion
+- Red Melee Minion
+- Vayne
 
-## 22.11.2017
-Planned how to implement the decision making. It will be based on a few parameters and also factor in the distance to the closest enemy tower into its decision making. Also it is required to know how much hp the player character has as a measure of "reward" for an action.
-Therefore a function to determine the percent of HP the player character has was implemented counting the green/non-green pixels of the health bar in the HUD.
-## 20.11.2017
-Added a hardcoded logic to make decisions (attack, reposition, approach enemy, and move to enemy base) based on the distance to the closest enemy. If an enemy is too close reposition and if its to far approach it. If it is in attakc range and not to close attack the enemy.
-The results were quite good and the agent is keeping a safe distance to enemies and attacks them when possible. The additional calculations drain my notebooks resources and the calculation algorithm just performs every 1.5 seconds which is barely enough to react fast to changes in the game. Better hardware and using GPU acceleration would be necessary.
-## 14.11.2017
-Wrote new helper functions to also generate a precise x|y position of minions. These positions are then used to find out in which state of the discretized enviornment they are. Next step implement decision making based on the state matrix, generating a matrix containing the rewards and implement the Markovian Process for determining the best action to take
-## 13.11.2017
-Testing of an improved model which can now detect the player champion, enemy minions and enemy towers. The resulting accuracy was surprisingly high. The champion and towers are detected with accuracies of over 90% and minions are even detected when overlaping with other minions. I guess it was worth it to spend 2 days recording and labeling 600 pictures as a training set...
-## 4.11.2017
-Taking more pictures of the player character in more situations to improve detection performance. Also starting to train the model to recognize enemy minions. Took about 350 images of the player character and 200 of enemy minions.
-## 26.10.2017
-https://youtu.be/iJSQLHRssiI
-So far the bot can detect itself in the game. Around its position a grid is established with each cell representing a state in which the player could be. So far the selection of the next state to move to is hard coded. The player just moves to the top right state all the time. This results in the bot moving to the top right corner of the map where the enemy nexus is.
+## Missing Objects
+- All champions except vayne
+- Add Red inhibitors, nexus, super minions
+- Add Blue towers, nexus, inhibitors, minions
+
+## Abstract
+The task is to create an agent that is able to play 3rd person massive multiplayer online battle arena games (MOBA) like League of Legends, Dota 2 and Heroes of the Storm with the same input as a human player.
+Since League of Legends does not provide an interface to the game, object detection is used.
+In this project a python implementation of Yolo v3 object detector and a way of randomly generating an infine amout of training data is introduced.
+
+## Object detection
+TODO: Describe the object detector was implemented and can be used
+
+## Installation/Usage
+TODO
+
+## The LeagueAI Dataset
+Creating large datasets from scratch can be very work intensive.
+For the first implementation of the LeageAI about 700 hand labeled pictures were used.
+Labeling 700 pictures took about 4 days of work and only included 4 game objects (1 champion model, allied and enemy minions and enemy towers).
+Therefore, the new dataset was created by automatically generating training data based on 3D models extracted from the game.
+
+1. Obtaining champion and minion models form 3D models
+To obtain the image data I used the online League of Legends model viewer from https://teemo.gg/model-viewer.
+For each ingame object and each animation I recorded a short video clip while rotating the 3D model.
+Next I used the pyFrameExporter.py script to extract individual pictures from the clips.
+For the minions I used Adobe After Effects to add a green background to the videos of the minions and towers (all objects where I could not find the 3D models).
+For each of the objects exported frames I used the pyExportTransparentPNG.py script.
+The script removes the green/purple background from the individual screenshots and leaves you with the masked png of an objects.
+Furthermore, the scrip crops the images to the content and removes excess seethrough space.
+
+This leaves me with about 1000 masked images of each object that can be later used to generate labeled fake screenshots of the game.
+
+2. Combining the masked and cropped images with game background 
+To generate a large amount of training data that cover all regions of the game map, I generated a series of 200 screenshots from all over the map using the frame exporter script.
+Then the masked and cropped images from step 1 are randomly combined with the map screenshots using the bootstrap.py script.
+Since we place the images using a script it is possible to obtain the objects position in the image and thus automatically generate a label for it.
+
+To generate a large variety of screenshots the script can be adjusted to:
+- change the random amount of champions, minions and other objects 
+- randomly add a number of cursers
+- randomly add the game HUD to the screenshot
+- randomly scale all the objects
+- cluster the minions to create more realistic clumps of fighting minions
+- apply gaussian blur and random noise to the image
+
+Using this method a dataset of many thousands of different labeled fake screenshots can be generated in a matter of hours.
+
+## Extracting health information
 
 
+# Sources
+- Implementing Yolov3 object detection from scratch: https://github.com/ayooshkathuria/YOLO_v3_tutorial_from_scratch
+- For training: https://pjreddie.com/darknet/yolo/, Yolov3: An Incremental Improvement, J. Redmond and A. Farhadi, 2018
