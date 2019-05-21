@@ -3,7 +3,7 @@ Implementation of an A.I. Player for the videogame League of Legends based on Im
 
 Attention: The old version can be found in the branch "LeagueAI_2017".
 
-Attentino: This project is still under development, the datasets I generate and the YOLOv3 object detection weights I trained will be made available soon! Meanwhile check out the included report on how to generate synthetic training data for League of Legends.
+Attention: This project is still under development, the datasets I generate and the YOLOv3 object detection weights I trained will be made available soon! Meanwhile check out the included report on how to generate synthetic training data for League of Legends.
 
 # OLD VERSION
 This is a newer version of the old implementation and shall provide a framework that lets you build your own applications based on detecting objects in the game. As an example I will implement the old 2017 LeagueAI bot on this framework.
