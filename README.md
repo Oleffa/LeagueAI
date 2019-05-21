@@ -1,10 +1,16 @@
 # LeagueAI
 Implementation of an A.I. Player for the videogame League of Legends based on Image Recognition using PyTorch
 
+Attention: The old version can be found in the branch "LeagueAI_2017".
+
+Attentino: This project is still under development, the datasets I generate and the YOLOv3 object detection weights I trained will be made available soon! Meanwhile check out the included report on how to generate synthetic training data for League of Legends.
+
+# OLD VERSION
+This is a newer version of the old implementation and shall provide a framework that lets you build your own applications based on detecting objects in the game. As an example I will implement the old 2017 LeagueAI bot on this framework.
 Demo video of Tensorflow implementation from 2017: https://www.youtube.com/watch?v=KRWFCaXfOTk
 
 ## TODO
-1) Dataset generation
+1) Dataset generation, add these objects to the raw data
 - Fix some bugs with the tower cropping of the raw data
 - Towers in fog of war
 - Turret plating
@@ -14,13 +20,10 @@ Demo video of Tensorflow implementation from 2017: https://www.youtube.com/watch
 - More different cursors
 - More cursors
 - health bars
-- Create real live test dataset with both vayne skins
-- Make new dataset with proper towers
-- Train a model with the old dataset
-- The map calculation is wrong i think, if it detects too much, then sometimes objects are used twice for map computation, does it make sense?
 
-2) Long term goals:
-- Extract object positions from the minimap to get an understanding of the global map
+2) Other TODOs:
+- Extract object positions from the minimap to get an understanding of the global map.
+- The mAP calculation needs a rework, sometimes objects are used twice for map computation.
 
 
 ## Currently Detectable Objects
