@@ -1,0 +1,72 @@
+New 04_16:
+Done
+correct detected:     [18, 16, 91, 53, 38]
+not detected:         [13, 0, 2, 1, 4]
+wrong detected:       [5, 2, 10, 35, 12]
+ground truth :        [36, 18, 103, 89, 54]
+mAP:                  [0.5, 0.8888888888888888, 0.883495145631068, 0.5955056179775281, 0.7037037037037037]
+
+mean_minions: 0.789
+
+New 05_01:
+Done
+correct detected:     [28, 5, 86, 48, 42]
+not detected:         [7, 2, 0, 1, 0]
+wrong detected:       [1, 11, 17, 40, 12]
+ground truth :        [36, 18, 103, 89, 54]
+mAP:                  [0.7777777777777778, 0.2777777777777778, 0.8349514563106796, 0.5393258426966292, 0.7777777777777778]
+
+mean minions: 0.551
+
+New 05_02:
+Done
+correct detected:     [29, 8, 94, 56, 51]
+not detected:         [5, 0, 3, 1, 0]
+wrong detected:       [2, 10, 6, 32, 3]
+ground truth :        [36, 18, 103, 89, 54]
+mAP:                  [0.8055555555555556, 0.4444444444444444, 0.912621359223301, 0.6292134831460674, 0.9444444444444444]
+mean minions: 0.66
+weighted: 0.6917142857142856
+
+New 05_02, low res:
+Done
+correct detected:     [29, 18, 96, 65, 54]
+not detected:         [7, 0, 1, 1, 0]
+wrong detected:       [0, 0, 6, 23, 0]
+ground truth :        [36, 18, 103, 89, 54]
+mAP:                  [0.8055555555555556, 1.0, 0.9320388349514563, 0.7303370786516854, 1.0]
+mean minions: 0.8874 
+combined minions weighted: 0.852
+
+Mixed:
+@ 960, 3 classes
+Done
+correct detected:     [27, 175, 51]
+not detected:         [9, 0, 2]
+wrong detected:       [0, 35, 1]
+ground truth :        [36, 210, 54]
+mAP:                  [0.75, 0.8333333333333334, 0.9444444444444444]
+
+
+Old:
+Done
+correct detected:     [18, 174, 44]
+not detected:         [14, 0, 9]
+wrong detected:       [4, 36, 1]
+ground truth :        [36, 210, 54]
+mAP:                  [0.5, 0.8285714285714286, 0.8148148148148148]
+
+Video results new:
+Exactly 1: 0.8853
+At Least 1: 0.974
+None: 0.026
+
+Video results old:
+Exactly 1:  0.8414
+At Least 1:  0.8442
+None:  0.1558
+
+Video results mixed:
+Exactly 1:  0.8414
+At Least 1:  0.8442
+None:  0.1558

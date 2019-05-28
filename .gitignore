@@ -4,18 +4,9 @@
 __pycache__
 weights/*
 videos/*
-images/*
-test_map/*
-papers/*
 raw_data/*
 det/*
 
-report/sections
-report/figures
-report/Makefile
-report/*.PID
-report/*.cls
-report/*.tex
 report/report.log
 report/report.synctex.gz
 report/report.aux
@@ -24,8 +15,6 @@ report/report.blg
 report/report.out
 report/report.sta
 
-LeagueAI_vayne_bot.py
-image_detection.py
 
 generate_dataset/map/*
 generate_dataset/map_fog/*
