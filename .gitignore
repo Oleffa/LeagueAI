@@ -4,8 +4,18 @@
 __pycache__
 weights/*
 videos/*
+images/*
 test_map/*
+papers/*
+raw_data/*
+det/*
 
+report/sections
+report/figures
+report/Makefile
+report/*.PID
+report/*.cls
+report/*.tex
 report/report.log
 report/report.synctex.gz
 report/report.aux
@@ -20,8 +30,8 @@ generate_dataset/masked_champions/*
 generate_dataset/masked_minions/*
 generate_dataset/masked_towers/*
 generate_dataset/Dataset*
-generate_dataset/cursor/*
-generate_dataset/champion_icons/*
 generate_dataset/ui/*
+generate_dataset/overlay.png
+generate_dataset/2017_LeagueAIDataset
 
 
