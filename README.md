@@ -34,17 +34,17 @@ Demo video of Tensorflow implementation from 2017: https://www.youtube.com/watch
 - Vayne
 
 ## Missing Objects
-- All champions except vayne
+- More champions
 - Add Red inhibitors, nexus, super minions
 - Add Blue towers, nexus, inhibitors, minions
 
 ## Abstract
-The task is to create an agent that is able to play 3rd person massive multiplayer online battle arena games (MOBA) like League of Legends, Dota 2 and Heroes of the Storm with the same input as a human player.
+The task is to create an agent that is able to play 3rd person massive multiplayer online battle arena games (MOBA) like League of Legends, Dota 2 and Heroes of the Storm with the same input as a human player, namely vision.
 Since League of Legends does not provide an interface to the game, object detection is used.
-In this project a python implementation of Yolo v3 object detector and a way of randomly generating an infine amout of training data is introduced.
+In this project a python implementation of Yolo v3 object detector and a way of randomly generating an infinite amout of training data is introduced.
 
 ## Object detection
-TODO: Describe the object detector was implemented and can be used
+For more information on the object detector refer to my technical report at: https://arxiv.org/abs/1905.13546 or directly to the YOLOv3 website [2]
 
 ## Installation/Usage
 TODO
@@ -58,9 +58,9 @@ Therefore, the new dataset was created by automatically generating training data
 1. Obtaining champion and minion models form 3D models
 To obtain the image data I used the online League of Legends model viewer from https://teemo.gg/model-viewer.
 For each ingame object and each animation I recorded a short video clip while rotating the 3D model.
-Next I used the pyFrameExporter.py script to extract individual pictures from the clips.
+Next I used the `pyFrameExporter.py` script to extract individual pictures from the clips.
 For the minions I used Adobe After Effects to add a green background to the videos of the minions and towers (all objects where I could not find the 3D models).
-For each of the objects exported frames I used the pyExportTransparentPNG.py script.
+For each of the objects exported frames I used the `pyExportTransparentPNG.py` script.
 The script removes the green/purple background from the individual screenshots and leaves you with the masked png of an objects.
 Furthermore, the scrip crops the images to the content and removes excess seethrough space.
 
@@ -69,7 +69,7 @@ This leaves me with about 1000 masked images of each object that can be later us
 2. Combining the masked and cropped images with game background 
 To generate a large amount of training data that cover all regions of the game map, I generated a series of 200 screenshots from all over the map using the frame exporter script.
 Then the masked and cropped images from step 1 are randomly combined with the map screenshots using the bootstrap.py script.
-Since we place the images using a script it is possible to obtain the objects position in the image and thus automatically generate a label for it.
+Since the images are placed using a script it is possible to obtain the objects position in the image and thus automatically generate a label for it.
 
 To generate a large variety of screenshots the script can be adjusted to:
 - change the random amount of champions, minions and other objects 
@@ -81,9 +81,23 @@ To generate a large variety of screenshots the script can be adjusted to:
 
 Using this method a dataset of many thousands of different labeled fake screenshots can be generated in a matter of hours.
 
+A full description of the dataset generation process and evaluation compared to hand labeled data can be found in the following publication: https://arxiv.org/pdf/1905.13546.pdf
+
+To cite please use:
+```
+@article{leagueaidatasetgeneration,
+  title={LeagueAI: Improving object detector performance and flexibility through automatically generated training data and domain randomization},
+  author={Struckmeier, Oliver},
+  journal = {arXiv},
+  year={2019}
+}
+```
+
 ## Extracting health information
+TODO
 
 
 # Sources
-- Implementing Yolov3 object detection from scratch: https://github.com/ayooshkathuria/YOLO_v3_tutorial_from_scratch
-- For training: https://pjreddie.com/darknet/yolo/, Yolov3: An Incremental Improvement, J. Redmond and A. Farhadi, 2018
+[1] Implementing Yolov3 object detection from scratch: https://github.com/ayooshkathuria/YOLO_v3_tutorial_from_scratch
+
+[2] For training: https://pjreddie.com/darknet/yolo/, Yolov3: An Incremental Improvement, J. Redmond and A. Farhadi, 2018
