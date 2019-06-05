@@ -14,6 +14,7 @@ report/report.bbl
 report/report.blg
 report/report.out
 report/report.sta
+report/evince.PID
 
 
 generate_dataset/map/*
