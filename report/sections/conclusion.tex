@@ -1,0 +1,25 @@
+\section{Conclusion and future works}
+In this technical report I presented my method of training an object detector for a video game using synthetically generate training data.
+The performance of a model trained on the synthetic data was compared to a model trained on hand labeled data.
+I trained three models and compared their performance by computing the mAP on a set of hand labeled test images and by comparing their tracking time of an object in a video clip of the game.
+The model trained on the synthetic data was capable of reaching higher mAP on more classes (5 instead of 3) and was able to more consistently track the player character in a real-time scenario.
+Furthermore, the time spent to generate the training data was significantly lower for the automatically generated training data.
+Analyzing the individual detections shows that model $\mathcal{S}$ is generally better able to generalize to unseen data and handle overlaps but sometimes detects objects it should not detect them (dead minions).
+This indicates that by combining hand labeled and synthetic data, the detection performance could be further improved.
+Especially on classes that overlap often and appear most of the time, like minions, adding hand labeled data could significantly improve detection precision.
+
+The results of previous research in \cite{rajpura2017object} and \cite{prakash2018structured}, that combining synthetic and hand labeled data would further improve the performance of the object detector, could not be confirmed.
+The performance of the combined dataset was better than the hand labeled data but worse than the synthetic data.
+The different aspect ratios of the old hand labeled dataset and the new synthetic images are likely the reason for the lower performance.
+Since the project has moved to higher resolution training data and already shows good performance, repeating the performance evaluation with new hand labeled data is not a high priority.
+For the future, I plan to develop a method to fuse automatic and hand labeling capabilities especially for smaller objects that occlude each other often like the minions.
+Especially in these cases the detection accuracy could be improved as suggested by the related literature.
+
+In future work the dataset generation will be expanded to a many more object classes (possibly all 140+ champions as well as the blue teams minions and structures).
+
+Lastly, the generation of raw data to generate the training data could be further improved.
+I found out that a 3D model of the game map is available for download.
+Thus instead of using video recordings of the model viewer and merging it with images of the game map, I would directly use the map 3D model and place the 3D objects directly into the map to generate even more realistic scenes.
+However, considering the already quite good performance and the amount of work required for this, I will not prioritize this approach.
+
+The next steps for the LeagueAI framework will be to extract information about the health/mana of the characters and their position locally in the screen and globally on the map.

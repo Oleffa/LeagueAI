@@ -1,0 +1,55 @@
+\begin{thebibliography}{10}
+
+\bibitem{milford2004ratslam}
+M.~J. Milford, G.~F. Wyeth, and D.~Prasser, ``Ratslam: a hippocampal model for
+  simultaneous localization and mapping,'' in {\em IEEE International
+  Conference on Robotics and Automation, 2004. Proceedings. ICRA'04. 2004},
+  vol.~1, pp.~403--408, IEEE, 2004.
+
+\bibitem{berkvens2014biologically}
+R.~Berkvens, A.~Jacobson, M.~Milford, H.~Peremans, and M.~Weyn, ``Biologically
+  inspired slam using wi-fi,'' in {\em 2014 IEEE/RSJ International Conference
+  on Intelligent Robots and Systems}, pp.~1804--1811, IEEE, 2014.
+
+\bibitem{steckel2013batslam}
+J.~Steckel and H.~Peremans, ``Batslam: Simultaneous localization and mapping
+  using biomimetic sonar,'' {\em PloS one}, vol.~8, no.~1, p.~e54076, 2013.
+
+\bibitem{cheung2012maintaining}
+A.~Cheung, D.~Ball, M.~Milford, G.~Wyeth, and J.~Wiles, ``Maintaining a
+  cognitive map in darkness: the need to fuse boundary knowledge with path
+  integration,'' {\em PLoS computational biology}, vol.~8, no.~8, p.~e1002651,
+  2012.
+
+\bibitem{milford2013brain}
+M.~J. Milford and A.~Jacobson, ``Brain-inspired sensor fusion for navigating
+  robots,'' in {\em Robotics and Automation (ICRA), 2013 IEEE International
+  Conference on}, pp.~2906--2913, IEEE, 2013.
+
+\bibitem{rusu2008learning}
+R.~B. Rusu, Z.~C. Marton, N.~Blodow, and M.~Beetz, ``Learning informative point
+  classes for the acquisition of object model maps,'' in {\em Control,
+  Automation, Robotics and Vision, 2008. ICARCV 2008. 10th International
+  Conference on}, pp.~643--650, IEEE, 2008.
+
+\bibitem{kim2007biomimetic}
+D.~Kim and R.~M{\"o}ller, ``Biomimetic whiskers for shape recognition,'' {\em
+  Robotics and Autonomous Systems}, vol.~55, no.~3, pp.~229--243, 2007.
+
+\bibitem{salman2018whisker}
+M.~Salman and M.~J. Pearson, ``Whisker-ratslam applied to 6d object
+  identification and spatial localisation,'' in {\em Conference on Biomimetic
+  and Biohybrid Systems}, pp.~403--414, Springer, 2018.
+
+\bibitem{milford2005experience}
+M.~Milford, D.~Prasser, and G.~Wyeth, ``Experience mapping: producing spatially
+  continuous environment representations using ratslam,'' in {\em Proceedings
+  of Australasian Conference on Robotics and Automation 2005}, Australian
+  Robotics and Automation Association Inc, 2005.
+
+\bibitem{grant2009active}
+R.~A. Grant, B.~Mitchinson, C.~W. Fox, and T.~J. Prescott, ``Active touch
+  sensing in the rat: anticipatory and regulatory control of whisker movements
+  during surface exploration,'' {\em Journal of neurophysiology}, 2009.
+
+\end{thebibliography}

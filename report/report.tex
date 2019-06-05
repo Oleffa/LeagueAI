@@ -1,0 +1,74 @@
+\documentclass[letterpaper, 10 pt, journal, twoside]{ieeeconf}  % Comment this line out if you need a4paper
+\IEEEoverridecommandlockouts                              % This command is only needed if you want to use the \thanks command
+\overrideIEEEmargins                                      % Needed to meet printer requirements.
+
+
+\usepackage{capt-of,graphicx,subcaption}
+\usepackage{xargs}                      % Use more than one optional parameter in a new commands
+\usepackage[pdftex,dvipsnames]{xcolor}  % Coloured text etc.
+\usepackage[colorinlistoftodos,prependcaption]{todonotes}
+\usepackage{amsmath,amssymb,bm,mathtools}
+\usepackage{cite}
+\usepackage[font={small,it}]{caption}
+\usepackage{relsize}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{gensymb} %% for the degree symbol
+\usepackage{tikz}
+\usetikzlibrary{shadings}
+\usepackage[margin=1.5cm]{geometry} %% Modify page margins if needed
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage[subpreambles]{standalone} %% include standalone pseudocodes
+%Links
+\usepackage{hyperref}
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%% SETUP COMMENTING PER AUTHOR. EACH AUTHOR GETS UNIQUE INITIALS AND COLOR %%%%%%%%%%
+
+\newcommandx{\oliver}[2][1=]{\todo[linecolor=Orchid,backgroundcolor=Goldenrod!25,bordercolor=Orchid,#1,inline]{Oliver: #2}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Macro for Algorithm Name
+\newcommand{\Project}{LeagueAI}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\graphicspath{{./sections/figures/}} % Define path to folder containing figures
+
+%%% TITLE INFORMATION
+\title{\LARGE \textbf{\Project: Improving object detector performance and flexibility through automatically generated training data and domain randomization}}
+
+
+\author{Oliver Struckmeier
+\thanks{Oliver Struckmeier, is with the Department of Electrical Engineering and Automation, Aalto University, Espoo 02150, Finland \tt \footnotesize \{oliver.struckmeier\}@aalto.fi}
+}
+
+
+\begin{document}
+\maketitle
+\input{sections/abstract}%% abstract
+
+%% Introduction
+\input{sections/intro}
+
+%% Method
+\input{sections/method}
+
+
+%% Empirical Evaluation
+\input{sections/evaluation}
+
+
+%% Conclusion and Future works
+\input{sections/conclusion}
+
+%%% Bibliography
+\bibliographystyle{ieeetr}
+\bibliography{sections/ref}%
+
+\end{document}
