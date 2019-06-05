@@ -8,8 +8,11 @@ This speed-up allows the application of object detection to real-time applicatio
 However, training neural networks for object classification tasks requires vast amounts of training data, which is usually difficult to obtain because it requires human generated annotations.
 Labeling images is a laborious and time intensive task and is a major obstacle when designing new applications based on object detection and classification.
 In recent research domain randomization is used in simulation for training DNNs and then transferring them to real world applications~\cite{tobin2017domain}.
-Further research has investigated how synthetic images can be used to train CNNs~\cite{rajpura2017object}.
+Further research has investigated how synthetic images can be used to train CNNs~\cite{rajpura2017object,prakash2018structured}.
 Rajpura et al. found that synthetic images created from rendering 3D-models in a randomized 3D-scene provide less precise object detection, but when combined with real data lead to a higher mean average precision (mAP).
+In a recent work Prakash et al. proposed a new method for synthetic dataset generation that takes the structure and the context of a scene into account.
+Trained to detect cars using only synthetic data and benchmarked on the KITTI benchmark suite, the method outperformed other state of the art synthetic data generation methods.
+Furthermorel, the paper supports the claim that combining synthetic and hand labeled data further improves the performance of the trained model.
 
 It is evident that the capability to automatically generate training data for new domains can drastically reduce the effort required to train new models and allow for more flexible and efficient applications using object detection.
 
@@ -24,15 +27,14 @@ The detection speed allow real-time use of the detectors at roughly 12-18 frames
 
 \section{Code}
 In this section the structure of the code of this project is briefly explained.
-All snapshot of the currently private repository is available on \href{https://aaltofi-my.sharepoint.com/:u:/g/personal/oliver_struckmeier_aalto_fi/Ebc1jLdGe7RAuuleDjENMlsBIwyYxeksp6VNhCMuK4cz2g?e=jltdhY}{Onedrive}\footnote{https://aaltofi-my.sharepoint.com/:u:/g/personal/oliver\_struckmeier\_aalto\_fi/\\Ebc1jLdGe7RAuuleDjENMlsBIwyYxeksp6VNhCMuK4cz2g?e=jltdhY}.
+All snapshot of the currently private repository is available on \href{https://github.com/Oleffa/LeagueAI}{GitHub}\footnote{https://github.com/Oleffa/LeagueAI}.
 \begin{itemize}
 \item \texttt{LeagueAI\_helper.py}: The core of the framework providing all important functions for object detection, loading datasets etc.
 \item \texttt{LeaugeAI\_minimal\_example.py}: A minimal example demonstrating how to use the framework with different inputs such as videos, images and in real-time on the game.
 \item \texttt{LeagueAI\_vayne\_bot.py}: An implementation of the bot from the old project with the new LeagueAI framework.
 \item \texttt{LeagueAI\_mAP.py}: Compute the mean average precision for each class against a test dataset.
-\item \texttt{image\_detection.py}, \texttt{video\_detection.py}: Basic video and image detection scripts.
 \item \texttt{plot\_loss.py}: Plot the loss during training.
-\item \texttt{yolov3\_detector.py}: The YOLOv3 detector implemented from scratch following this tutorial: \href{https://blog.paperspace.com/how-to-implement-a-yolo-object-detector-in-pytorch}{How to implement a yolo object detector in pytorch}
+\item \texttt{yolov3\_detector.py}: The YOLOv3 detector implemented from scratch following this tutorial: \href{https://blog.paperspace.com/how-to-implement-a-yolo-object-detector-in-pytorch}{How to implement a YOLO object detector in pytorch}
 \end{itemize}
 The code for the dataset generation is in the subfolder \texttt{generate\_dataset/}.
 Next to the dataset generation script itself, various helper scripts are included:
@@ -42,6 +44,6 @@ Next to the dataset generation script itself, various helper scripts are include
 \item \texttt{rename\_classes.py}: Rename classes within the labels of a dataset (used to combine multiple classes into one, or when the ID of an object changes)
 \item \texttt{split\_test\_train.py}: Dividing a dataset in training and testing dataset
 \item \texttt{remove\_outline.py}: A script to manipulate the outline of objects to add outlines, remove outlines and add glow around objects
-\item \texttt{convert\_tensorflow\_to\_pytorch.py}: Convert tensorflow label data to the format required to train YOLOv3
+\item \texttt{convert\_tensorflow\_to\_pytorch.py}: Convert Tensorflow label data to the format required to train YOLOv3
 \item \texttt{check\_dataset\_integrity.py}: A script to check if a label exists for every image
 \end{itemize}

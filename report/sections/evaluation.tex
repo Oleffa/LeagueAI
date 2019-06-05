@@ -58,7 +58,7 @@ The following classes are included in the synthetic dataset:
 \end{itemize}
 In the hand labeled dataset the minions are grouped into one class.
 
-In case one wants to train the synthetic model with only three classes, combining the minions into one class, I wrote a script that can do so: (\texttt{rename\_classes.py}).
+In case one wants to train the synthetic model with only three classes, combining the minions into one class, I wrote a script that can do so by replacing object class IDs: (\texttt{rename\_classes.py}).
 
 \subsection{Training the models}
 The models have been trained using \textit{darknet}~\cite{darknet13}\footnote{\href{https://pjreddie.com/darknet/}{Darknet Website}, \href{https://github.com/pjreddie/darknet}{GitHub}}, an open source neural network framework written in C.
@@ -153,10 +153,10 @@ The reduced learning rate was introduced to prevent overfitting of the model.
 \hline
 	Character tracking time in percent of the whole video: & & &\\
 \hline
-	Correctly detected character & $88.53\%$ & $84.12\%$ & $73.2$ \\
-	Detected character multiple times & $8.87\%$ & $0.28\%$ & $1.73$ \\
-	No detection 	& $2.6\%$ & $15.6\%$ & $25.1$\\
-	FPS				& $18$		& $12$ & $10$\\
+	Correctly detected character & $88.53\%$ & $84.12\%$ & $73.2\%$ \\
+	Detected character multiple times & $8.87\%$ & $0.28\%$ & $1.73\%$ \\
+	No detection 	& $2.6\%$ & $15.6\%$ & $25.1\%$\\
+	FPS	on a GTX1080		& $18$		& $12$ & $10$\\
 \hline
 \end{tabular}
 \end{table*}
@@ -218,7 +218,7 @@ It can be seen that both models could track the player character more than $84\%
 
 Interestingly, model $\mathcal{H}$ was 7 times more likely to not detect the character than $\mathcal{S}$.
 On the other hand $\mathcal{S}$ 40 times more likely to detect the player character and other objects that were mistaken for the player character.
-However, this is not as big of a problem as losing tracking entirely since sorting the multiple detections of the player character by their confidence usually gives the correct object as the detection with the highest confidence.
+However, multiple detections are not as big of a problem as losing tracking entirely since sorting the list of possible character detections by their confidence usually gives the correct object as the detection with the highest confidence.
 \begin{figure}[H]
 \includegraphics[width=0.5\textwidth]{figures/new_05_02_final.png}
 \caption{Mean average detection precision per class on a test set of 54 hand labeled images for the new model trained on synthetic data. Note that here the minion category is split up in the three different types of minions.}
@@ -267,13 +267,13 @@ We can see that $\mathcal{S}$ was still capable of detecting the champion.
 This is most likely a result of the introduced blur and noise as well as the larger amount of training data, allowing $\mathcal{S}$ to better handle the additional color changes.
 
 \subsection{Combining the datasets}
-In order to confirm the findings in \cite{rajpura2017object}, that combining hand labeled and synthetic data can improve the performance of object detectors, both the datasets from $\mathcal{S}$ and $\mathcal{H}$ have been combined and used to train a model $\mathcal{C}$.
+In order to confirm the findings in \cite{rajpura2017object} and \cite{prakash2018structured}, that combining hand labeled and synthetic data can improve the performance of object detectors, both the datasets from $\mathcal{S}$ and $\mathcal{H}$ have been combined and used to train a model $\mathcal{C}$.
 As can be seen in Table \ref{tab:2} the performance of $\mathcal{C}$ was in between $\mathcal{S}$ and $\mathcal{H}$.
 In the video comparison the combined model actually performs worse than the other models, with most of the errors being cause by not detecting the player character.
-This does not match the expectations as more different hand labeled data should at least provide similar performance to the synthetic data, since this data made up the biggest part of the training data.
+This does not match the expectations as more different hand labeled data should at least provide similar performance to the synthetic data.
 The reason for this is most likely the different aspect ratio of the synthetic and hand labeled images.
 Furthermore, I had to reduce the number of classes in the synthetic dataset to 3 by combining all minion types into one.
-While this should not cause any problems, retraining the model in the future will be required.
-For the scope of this project I will probably create a new hand labeled dataset for the minions of both teams, because Figure \ref{fig:results_old} and \ref{fig:results_new} as well as Table \ref{tab:2} show that the detection on the minions is the most unprecise.
-Providing additionally hand labeled data on these smaller and more frequent occurring objects might improve detection quality on these objects.
+Therefore, retraining the combined model with similar data is very likely going to further improve the performance.
+In the future I will probably create a new hand labeled dataset for the minions of both teams, because Figure \ref{fig:results_old} and \ref{fig:results_new} as well as Table \ref{tab:2} show that the detection on the minions is the most unprecise and could therefore benefit from additional human labeled data.
+Additionally hand labeled data on these smaller, often overlapping and more frequent occurring objects might improve detection quality.
 

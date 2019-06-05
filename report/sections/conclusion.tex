@@ -8,16 +8,18 @@ Analyzing the individual detections shows that model $\mathcal{S}$ is generally 
 This indicates that by combining hand labeled and synthetic data, the detection performance could be further improved.
 Especially on classes that overlap often and appear most of the time, like minions, adding hand labeled data could significantly improve detection precision.
 
-The results of previous research in \cite{rajpura2017object} that combining synthetic and hand labeled data would further improve the performance of the object detector could not be confirmed. The performance of the combined dataset was better than the hand labeled data but worse than the synthetic data. The different aspect ratios of the old hand labeled dataset and the new synthetic images are likely the reason for the lower performance.
+The results of previous research in \cite{rajpura2017object} and \cite{prakash2018structured}, that combining synthetic and hand labeled data would further improve the performance of the object detector, could not be confirmed.
+The performance of the combined dataset was better than the hand labeled data but worse than the synthetic data.
+The different aspect ratios of the old hand labeled dataset and the new synthetic images are likely the reason for the lower performance.
+Since the project has moved to higher resolution training data and already shows good performance, repeating the performance evaluation with new hand labeled data is not a high priority.
+For the future, I plan to develop a method to fuse automatic and hand labeling capabilities especially for smaller objects that occlude each other often like the minions.
+Especially in these cases the detection accuracy could be improved as suggested by the related literature.
 
-In future work, I plan to improve the dataset generation and provide a method to fuse automatic and hand labeling capabilities especially for smaller objects that occlude each other often.
+In future work the dataset generation will be expanded to a many more object classes (possibly all 140+ champions as well as the blue teams minions and structures).
 
-%The plan for further work is to train a model on synthetic data and then let it run on previously unseen video material.
-%For every frame, the software provides its predictions and labels to a human user.
-%The human can then say if the prediction was good or if objects were not detected or wrongly detected.
-%These images are then added to the training dataset.
-
-Furthermore, the generation of raw data to generate the training data could be further improved.
+Lastly, the generation of raw data to generate the training data could be further improved.
 I found out that a 3D model of the game map is available for download.
 Thus instead of using video recordings of the model viewer and merging it with images of the game map, I would directly use the map 3D model and place the 3D objects directly into the map to generate even more realistic scenes.
 However, considering the already quite good performance and the amount of work required for this, I will not prioritize this approach.
+
+The next steps for the LeagueAI framework will be to extract information about the health/mana of the characters and their position locally in the screen and globally on the map.
