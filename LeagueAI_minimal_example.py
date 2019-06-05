@@ -18,7 +18,7 @@ output_size = int(3440/3), int(1440/3)
 IO = input_output(input_mode='videofile', video_filename='videos/eval.mp4')
 ####################
 
-LeagueAI = LeagueAIFramework(config_file="cfg/LeagueAI.cfg", weights="weights/05_02_synthetic_LeagueAI/LeagueAI_final.weights", names_file="cfg/LeagueAI.names", classes_number = 5, resolution=int(960/1.5), threshold = 0.75, cuda=True, draw_boxes=True)
+LeagueAI = LeagueAIFramework(config_file="cfg/LeagueAI.cfg", weights="weights/05_02_LeagueAI/LeagueAI_final.weights", names_file="cfg/LeagueAI.names", classes_number = 5, resolution=int(960/1.5), threshold = 0.75, cuda=True, draw_boxes=False)
 
 while True:
     start_time = time.time()

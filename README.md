@@ -48,6 +48,7 @@ For more information on the object detector refer to my technical report at: htt
 
 ## Installation/Usage
 TODO
+TODO: Add some examples on how to use the existing files
 
 ## The LeagueAI Dataset
 Creating large datasets from scratch can be very work intensive.

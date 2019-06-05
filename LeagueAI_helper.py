@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 
 class detection:
-    def __init__(self, object_class, x_min, y_min, x_max, y_max):
+    def __init__(self, object_class, x_min, y_min, x_max, y_max, confidence):
         self.object_class = object_class
         self.x_min = x_min
         self.y_min = y_min
@@ -17,8 +17,9 @@ class detection:
         self.h = abs(y_max - y_min)
         self.x = x_min + int(self.w/2)
         self.y = y_min + int(self.h/2)
+        self.confidence = confidence
     def toString(self):
-        print("class: {}, min: ({}|{}), max: ({}|{}), width: {}, height: {}, center: ({}|{})".format(self.object_class, self.x_min, self.y_min, self.x_max, self.y_max, self.w, self.h, self.x, self.y))
+        print("class: {}, confidence: {}, min: ({}|{}), max: ({}|{}), width: {}, height: {}, center: ({}|{})".format(self.object_class, self.confidence, self.x_min, self.y_min, self.x_max, self.y_max, self.w, self.h, self.x, self.y))
 
 class input_output:
     def __init__(self, input_mode, SCREEN_WIDTH=None, SCREEN_HEIGHT=None, video_filename=None):
@@ -131,25 +132,24 @@ class LeagueAIFramework():
         for i in range(output.shape[0]):
             output[i, [1,3]] = torch.clamp(output[i, [1,3]], 0.0, im_dim[i,0])
             output[i, [2,4]] = torch.clamp(output[i, [2,4]], 0.0, im_dim[i,1])
-        colors = pkl.load(open("pallete", "rb"))
         if self.draw_boxes:
-            list(map(lambda x: self.draw_results(x, input_frame, colors), output))
+            list(map(lambda x: self.draw_results(x, input_frame), output))
 
         # Create a dict of all objects with their x,y center pos and width/height
         detected_objects = []
         for i in range(output.shape[0]):
-            d = detection(output[i][7], output[i][1], output[i][2], output[i][3], output[i][4])
+            d = detection(output[i][7], output[i][1], output[i][2], output[i][3], output[i][4], output[i][5])
             detected_objects.append(d)
         return detected_objects
 
-    def draw_results(self, x, results, colors):
+    def draw_results(self, x, results):
         font_size = 1
         font_thickness = 2
         c1 = tuple(x[1:3].int())
         c2 = tuple(x[3:5].int())
         img = results
         cls = int(x[-1])
-        color = colors[int(x[5])]
+        color = (255,0,0)
         label = "{0}".format(self.names[cls])
         cv2.rectangle(img, c1, c2,color, 2)
         t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_PLAIN, font_size, font_thickness)[0]
