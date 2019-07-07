@@ -8,7 +8,7 @@ import numpy as np
 
 class detection:
     def __init__(self, object_class, x_min, y_min, x_max, y_max, confidence):
-        self.object_class = object_class
+        self.object_class = int(object_class)
         self.x_min = x_min
         self.y_min = y_min
         self.x_max = x_max
@@ -41,14 +41,22 @@ class input_output:
         else:
             raise Exception('Unknown input mode!')
 
-    def get_pixels(self, output_size=None):
+    def get_fps(self):
+        if self.input_mode == "desktop" :
+            return int(30)
+        else:
+            return self.capture_device.get(cv2.CAP_PROP_FPS)
+
+    def get_pixels(self, scale):
         if self.input_mode == 'webcam':
             ret, frame = self.capture_device.read()
             assert(ret == True), 'Error: could not retrieve frame'
+            frame = cv2.resize(frame, scale)
             return frame
         if self.input_mode == 'videofile':
             ret, frame = self.capture_device.read()
             assert(ret == True), 'Error: could not retrieve frame'
+            frame = cv2.resize(frame, scale)
             return frame
         elif self.input_mode == 'desktop':
             frame = self.capture_device.grab(self.mon)
@@ -57,19 +65,14 @@ class input_output:
             R, G, B = screen.split()
             screen = Image.merge("RGB", [B, G, R])
             screen = np.array(screen)
-            if output_size == None:
-                output_size = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
-            screen = cv2.resize(screen, output_size)
+            screen = cv2.resize(screen, scale)
             return screen
         else:
             raise Exception('Unknown input mode!')
 
 import torch
-import torch.nn as nn
 from torch.autograd import Variable
 from yolov3_detector import Detector
-import pickle as pkl
-import random
 
 class LeagueAIFramework():
     def __init__(self, config_file, weights, names_file, classes_number, resolution, threshold, cuda=True, nms_confidence=0.4, draw_boxes=True):
@@ -141,6 +144,20 @@ class LeagueAIFramework():
             d = detection(output[i][7], output[i][1], output[i][2], output[i][3], output[i][4], output[i][5])
             detected_objects.append(d)
         return detected_objects
+
+    def get_objects_sorted(selfself, objects, available_objects):
+        object_list = []
+        app = 0
+        # Build lists, one for each object
+        for i in available_objects:
+            temp_list = []
+            for o in objects:
+                if o.object_class == int(i):
+                    temp_list.append(o)
+            if len(temp_list) > 0:
+                app += 1
+                object_list.append([temp_list])
+        return np.array(object_list)
 
     def draw_results(self, x, results):
         font_size = 1

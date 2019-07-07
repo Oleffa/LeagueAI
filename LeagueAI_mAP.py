@@ -59,10 +59,10 @@ new_model = False
 
 image_folder = "test_map/images_hand/"
 if new_model:
-    name_file = "/home/oli/Workspace/LeagueAI/cfg/LeagueAI.names"
+    name_file = "cfg/LeagueAI.names"
     label_folder = "test_map/labels_hand_5/"
 else:
-    name_file = "/home/oli/Workspace/LeagueAI/cfg/LeagueAI_2017.names"
+    name_file = "cfg/LeagueAI_2017.names"
     label_folder = "test_map/labels_hand_3/"
 names = load_classes(name_file)
 output_size = (int(1920/2), int(1080/2))

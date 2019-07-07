@@ -6,6 +6,7 @@ weights/*
 videos/*
 raw_data/*
 det/*
+.idea/*
 
 report/report.log
 report/report.synctex.gz
