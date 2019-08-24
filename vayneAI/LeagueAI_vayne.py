@@ -4,24 +4,24 @@
 import sys
 sys.path.append('..')
 from LeagueAI_helper import input_output, LeagueAIFramework
+from localization.posecells import *
 import time
 import cv2
 import agent_helper
-import numpy as np
 
 ####### Params ######
 # Show the AI view or not:
 show_window = True
 # Output window size
-screen_size = (3440, 1440)
+screen_size = (1920,1080)
 video_to_view_factor = 2
 ai_view_resolution = int(screen_size[0]/video_to_view_factor), int(screen_size[1]/video_to_view_factor)
 # To record the desktop use:
-#IO = input_output(input_mode='desktop', SCREEN_WIDTH=1920, SCREEN_HEIGHT=1080)
+#IO = input_output(input_mode='desktop', SCREEN_WIDTH=1920, SCREEN_HEIGHT=1130, x=0, y=50)
 # If you want to use the webcam as input use:
 #IO = input_output(input_mode='webcam')
 # If you want to use a videofile as input:
-IO = input_output(input_mode='videofile', video_filename='../videos/eval.mp4')
+IO = input_output(input_mode='videofile', video_filename='../videos/posecell_test.mp4')
 ####################
 
 LeagueAI = LeagueAIFramework(config_file="../cfg/LeagueAI.cfg", weights="../weights/05_02_LeagueAI/LeagueAI_final.weights",
@@ -38,13 +38,32 @@ class_colors = [(0, 0, 255), (71, 99, 255), (0, 165, 255), (0, 215, 255)]
 fps = IO.get_fps()
 agent_active = True
 
-for i in range(0, 600):
-    frame = IO.get_pixels(scale=screen_size)
+# Skip frames of video
+# TOOD move to IO
+#for i in range(0, 600):
+#    frame = IO.get_pixels(scale=screen_size)
+
+
+# Posecell localization stuff
+view_templates = ViewTemplates(vt_size_x=120, vt_size_y=80, vt_x_min=0,
+                               vt_y_min=0, vt_x_max=1920, vt_y_max=1080,
+                               rate=0, template_match_threshold=0.065)
+pc = PosecellNetwork(pc_x_size=21, pc_y_size=21, pc_w_e_dim=3, pc_w_i_dim=3,
+                     vt_active_decay=0.5, pc_vt_inject_energy=0.5,
+                     pc_vt_restore=0.04, pc_w_e_var=1.0, pc_w_i_var = 1.0,
+                     pc_global_inhib=0.005)
 
 while True:
     # ======= Image pipeline ======
     start_time = time.time()
     frame = IO.get_pixels(scale=screen_size)
+    # Localization using posecells
+    match_id = view_templates.on_image(frame)
+    pc.on_view_template(match_id)
+    pc.plot_posecell_network(fps)
+    pc.on_update(0.0, 0.0)
+
+    #print("current_match_id: ", match_id)
     if agent_active:
         objects = LeagueAI.get_objects(frame)
         # ======= Vayne AI code =======
@@ -55,50 +74,86 @@ while True:
             hp, frame = player.compute_hp(frame, draw_hp_box=True)
             frame = player.draw_bb(frame, (255, 0, 0))
 
-        objects_sorted = LeagueAI.get_objects_sorted(objects, available_objects)
-        # Find closest minion
-        shortest_list = []
-        distances = []
-        for l in objects_sorted:
-            cur_object_class = l[0][0].object_class
-            if cur_object_class != 4:
-                closest, distance = player.get_shortest(l[0])
-                shortest_list.append(closest)
-                distances.append(distance)
-        # Visualize the closest objects
-        i = 0
-        for l in shortest_list:
-            cv2.rectangle(frame, (l.x_min, l.y_min), (l.x_max, l.y_max), class_colors[l.object_class], 2)
-            cv2.line(frame, (player.x, player.y), (l.x, l.y), class_colors[l.object_class], thickness=1)
-        # Decision making
-        attack_tower_prob = 0
-        attack_canon_prob = 0
-        attack_caster_prob = 0
-        attack_melee_prob = 0
-        retreat_prob = 0
-        push_prob = 0
-        if l.object_class == 0: # Tower
-            attack_tower_prob = player.attack_prob(0, distances[i], player.hp)
-        elif l.object_class == 1: # Canon
-            attack_canon_prob = player.attack_prob(1, distances[i], player.hp)
-        elif l.object_class == 2: # Caster
-            attack_caster_prob = player.attack_prob(2, distances[i], player.hp)
-        elif l.object_class == 3: # Melee
-            attack_melee_prob = player.attack_prob(3, distances[i], player.hp)
-        else:
-            # If no enemies are found move back to midlane and push
-            push_prob = 100
-        i += 1
-        retreat_prob = player.retreat_prob(min(distances), player.hp)
-        action = player.decide_action(attack_tower_prob, attack_canon_prob, attack_caster_prob,
-                                      attack_melee_prob, push_prob, retreat_prob)
-        # Visualize the probabilites
-        frame = player.show_probs(frame, attack_tower_prob, attack_canon_prob, attack_caster_prob,
-                                  attack_melee_prob, push_prob, retreat_prob, action)
-        # TODO
-        # - only print line to the target that is being attacked (in red), that is closest when running (blue) also with same colorborder
-        # - The other make their boxes colored based on how close they are (blue - red)
-        # - Actuators
+
+
+            # Get the distance of each object to the player character
+            objects_sorted = LeagueAI.get_objects_sorted(objects, available_objects)
+            for object_class in objects_sorted:
+                for o in object_class:
+                    if o.object_class != 4:
+                        o.distance = player.get_distance(o)
+            # Find closest object of each class
+            shortest_list = [] # Stores the closest objects for each class with the nth element corresp. to the nth class
+            distances = [-1]*4
+            for l in objects_sorted:
+                cur_object_class = l[0].object_class
+
+                if cur_object_class != 4:
+                    closest, distance = player.get_shortest(l)
+                    shortest_list.append(closest)
+                    distances[cur_object_class] = distance
+            # Visualize the objects and their distances
+            for o in objects_sorted:
+                for l in o:
+                    if l.object_class != 4:
+                        if l.distance <= 450:
+                            color = (0, 0, 255)
+                        elif l.distance > 450 and l.distance < 750:
+                            color = (0, 255, 0)
+                        else:
+                            color = (255, 0, 0)
+                        cv2.rectangle(frame, (l.x_min, l.y_min), (l.x_max, l.y_max), color, 2)
+                        cv2.line(frame, (player.x, player.y), (l.x, l.y), color, thickness=2)
+            # Decision making
+            i = 0
+            attack_tower_prob = 0
+            attack_canon_prob = 0
+            attack_caster_prob = 0
+            attack_melee_prob = 0
+            retreat_prob = 0
+            push_prob = 0
+            for l in shortest_list:
+                if l.object_class == 0: # Tower
+                    attack_tower_prob = player.attack_prob(i, l.distance, player.hp)
+                elif l.object_class == 1: # Canon
+                    attack_canon_prob = player.attack_prob(i, l.distance, player.hp)
+                elif l.object_class == 2: # Caster
+                    attack_caster_prob = player.attack_prob(i, l.distance, player.hp)
+                elif l.object_class == 3: # Melee
+                    attack_melee_prob = player.attack_prob(i, l.distance, player.hp)
+                else:
+                    # If no enemies are found move back to midlane and push
+                    push_prob = 100
+                i += 1
+            retreat_prob = player.retreat_prob((max(0, min(distances))), player.hp)
+            #print("atow: {}, acan: {}, acast: {}, amele: {}, push: {}, retreat: {}".format(attack_tower_prob, attack_canon_prob, attack_caster_prob, attack_melee_prob, push_prob, retreat_prob))
+            #action = player.decide_action(attack_tower_prob, attack_canon_prob, attack_caster_prob,
+            #                              attack_melee_prob, push_prob, retreat_prob)
+            # Visualize the probabilites
+            #frame = player.show_probs(frame, attack_tower_prob, attack_canon_prob, attack_caster_prob,
+            #                          attack_melee_prob, push_prob, retreat_prob, action)
+
+            # Execute the action
+            """
+            if player.actions[action] ==  'Attack Tower':
+                pass
+            elif player.actions[action] ==  'Attack Canon':
+                # Left Click the closest Canon minion
+                #player.click_xy(shortest_list, obj_class=1, button=0)
+                pass
+            elif player.actions[action] ==  'Attack Caster':
+                pass
+            elif player.actions[action] ==  'Attack Melee':
+                pass
+            elif player.actions[action] ==  'Pushing':
+                pass
+            elif player.actions[action] ==  'Retreating':
+                pass
+            """
+
+            # TODO
+            # - Actuators
+            #   - Translate the xy click pos to absolute screen pos to click
     # ======= Write fps ===========
     cycle_time = time.time()-start_time
     cv2.putText(frame, "FPS: {}".format(str(round(1/cycle_time,2))), (10, 50), cv2.FONT_HERSHEY_SIMPLEX,1, (0,0,255), 2)

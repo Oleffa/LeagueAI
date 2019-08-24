@@ -18,11 +18,14 @@ class detection:
         self.x = x_min + int(self.w/2)
         self.y = y_min + int(self.h/2)
         self.confidence = confidence
+        self.distance = -1              # Store the distance of the object to the player, -1 is undefined
     def toString(self):
         print("class: {}, confidence: {}, min: ({}|{}), max: ({}|{}), width: {}, height: {}, center: ({}|{})".format(self.object_class, self.confidence, self.x_min, self.y_min, self.x_max, self.y_max, self.w, self.h, self.x, self.y))
 
 class input_output:
-    def __init__(self, input_mode, SCREEN_WIDTH=None, SCREEN_HEIGHT=None, video_filename=None):
+    def __init__(self, input_mode, SCREEN_WIDTH=None, SCREEN_HEIGHT=None, video_filename=None, x=None, y=None):
+        self.SCREEN_X = x
+        self.SCREEN_Y = y
         self.SCREEN_WIDTH = SCREEN_WIDTH
         self.SCREEN_HEIGHT = SCREEN_HEIGHT
         self.input_mode = input_mode
@@ -37,7 +40,7 @@ class input_output:
         elif input_mode == 'desktop':
             assert(SCREEN_HEIGHT is not None and SCREEN_HEIGHT is not None), "Error please set SCREEN_WIDTH and SCREEN_HEIGHT"
             self.capture_device = mss()
-            self.mon = {'top': 0, 'left': 0, 'width' : self.SCREEN_WIDTH, 'height' : self.SCREEN_HEIGHT}
+            self.mon = {'top': self.SCREEN_X, 'left': self.SCREEN_Y, 'width' : self.SCREEN_WIDTH, 'height' : self.SCREEN_HEIGHT}
         else:
             raise Exception('Unknown input mode!')
 
@@ -121,7 +124,7 @@ class LeagueAIFramework():
         output = self.write_results(output)
 
         if type(output) == int or output.size(0) <= 0:
-            print("No detection")
+            #print("No detection")
             return []
 
         im_dim = im_dim.repeat(output.size(0), 1)
@@ -156,7 +159,7 @@ class LeagueAIFramework():
                     temp_list.append(o)
             if len(temp_list) > 0:
                 app += 1
-                object_list.append([temp_list])
+                object_list.append(temp_list)
         return np.array(object_list)
 
     def draw_results(self, x, results):
