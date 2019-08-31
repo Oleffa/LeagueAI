@@ -56,6 +56,7 @@ class Player():
             print("Attack!")
         else:
             print("Info!")
+        return
 
     def click_object(self, shortest_list, obj_class, button):
         """

@@ -36,34 +36,54 @@ class_colors = [(0, 0, 255), (71, 99, 255), (0, 165, 255), (0, 215, 255)]
 
 # Manual Controls
 fps = IO.get_fps()
-agent_active = True
+agent_active = False
 
 # Skip frames of video
 # TOOD move to IO
-#for i in range(0, 600):
-#    frame = IO.get_pixels(scale=screen_size)
+for i in range(0, 180):
+    frame = IO.get_pixels(scale=screen_size)
 
 
 # Posecell localization stuff
 view_templates = ViewTemplates(vt_size_x=120, vt_size_y=80, vt_x_min=0,
                                vt_y_min=0, vt_x_max=1920, vt_y_max=1080,
                                rate=0, template_match_threshold=0.065)
-pc = PosecellNetwork(pc_x_size=21, pc_y_size=21, pc_w_e_dim=3, pc_w_i_dim=3,
+pc = PosecellNetwork(pc_x_size=160, pc_y_size=160, pc_w_e_dim=9, pc_w_i_dim=9,
                      vt_active_decay=0.5, pc_vt_inject_energy=0.5,
                      pc_vt_restore=0.04, pc_w_e_var=1.0, pc_w_i_var = 1.0,
-                     pc_global_inhib=0.005)
+                     pc_global_inhib=0.005, init_x=5, init_y=160-6, scale_factor=5)
 
+vo = None
+speed, angle = 0, 0
+draw_movement_vector = True
+
+# TODO
+# - Actuators
+# - Translate the xy click pos to absolute screen pos to click
+# - Get odom from click and use on_update
+
+# TODO
+# - stuff in posecells.py
 while True:
     # ======= Image pipeline ======
     start_time = time.time()
+    # Debug
     frame = IO.get_pixels(scale=screen_size)
+    if vo is None:
+        vo = VisualOdometry(frame, 5, draw=False)
+        speed, angle = 0, 0
+    else:
+        speed, angle = vo.get_optical_flow(frame)
+    if speed < 0.5:
+        speed = 0.0
     # Localization using posecells
     match_id = view_templates.on_image(frame)
     pc.on_view_template(match_id)
+    pc.update()
+    pc.path_integration(speed, angle)
     pc.plot_posecell_network(fps)
-    pc.on_update(0.0, 0.0)
+    pc_not_updated = True
 
-    #print("current_match_id: ", match_id)
     if agent_active:
         objects = LeagueAI.get_objects(frame)
         # ======= Vayne AI code =======
@@ -133,7 +153,7 @@ while True:
             #frame = player.show_probs(frame, attack_tower_prob, attack_canon_prob, attack_caster_prob,
             #                          attack_melee_prob, push_prob, retreat_prob, action)
 
-            # Execute the action
+            # Execute the action and get the odometry
             """
             if player.actions[action] ==  'Attack Tower':
                 pass
@@ -146,14 +166,19 @@ while True:
             elif player.actions[action] ==  'Attack Melee':
                 pass
             elif player.actions[action] ==  'Pushing':
+                # Move
+                vtrans_x, vtrans_y = 
                 pass
             elif player.actions[action] ==  'Retreating':
                 pass
             """
-
-            # TODO
-            # - Actuators
-            #   - Translate the xy click pos to absolute screen pos to click
+    # ======= Draw the movement vector ==========
+    if draw_movement_vector:
+        x1 = player.x
+        y1 = player.y
+        x2 = int(round(x1 - speed * 80 * np.cos(angle)))
+        y2 = int(round(y1 - speed * 80 * np.sin(angle)))
+        frame = cv2.line(frame, (x1, y1), (x2, y2), (0, 255, 0), 3)
     # ======= Write fps ===========
     cycle_time = time.time()-start_time
     cv2.putText(frame, "FPS: {}".format(str(round(1/cycle_time,2))), (10, 50), cv2.FONT_HERSHEY_SIMPLEX,1, (0,0,255), 2)
