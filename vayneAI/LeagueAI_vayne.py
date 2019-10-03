@@ -40,35 +40,40 @@ agent_active = False
 
 # Skip frames of video
 # TOOD move to IO
-for i in range(0, 180):
+for i in range(0, 20):
     frame = IO.get_pixels(scale=screen_size)
 
 
 # Posecell localization stuff
-view_templates = ViewTemplates(vt_size_x=120, vt_size_y=80, vt_x_min=0,
-                               vt_y_min=0, vt_x_max=1920, vt_y_max=1080,
-                               rate=0, template_match_threshold=0.065)
-pc = PosecellNetwork(pc_x_size=160, pc_y_size=160, pc_w_e_dim=9, pc_w_i_dim=9,
-                     vt_active_decay=0.5, pc_vt_inject_energy=0.5,
-                     pc_vt_restore=0.04, pc_w_e_var=1.0, pc_w_i_var = 1.0,
-                     pc_global_inhib=0.005, init_x=5, init_y=160-6, scale_factor=5)
+view_templates = ViewTemplates(vt_size_x=80, vt_size_y=50, vt_x_min=200,
+                               vt_y_min=80, vt_x_max=1800, vt_y_max=1080,
+                               rate=0, template_match_threshold=0.07)
+pc = PosecellNetwork(pc_x_size=80, pc_y_size=80, pc_w_e_dim=9, pc_w_i_dim=9,
+                     find_best_kernel_size = 3, vt_active_decay=0.5,
+                     pc_vt_inject_energy=0.5, pc_vt_restore=0.04,
+                     pc_w_e_var=1.0, pc_w_i_var = 1.0, pc_global_inhib=0.005,
+                     init_x=4, init_y=80-5, scale_factor=5, pc_cells_average=2)
 
 vo = None
 speed, angle = 0, 0
-draw_movement_vector = True
+draw_movement_vector = True # Agent needs to be active for it to work
 
 # TODO
 # - Actuators
 # - Translate the xy click pos to absolute screen pos to click
-# - Get odom from click and use on_update
 
 # TODO
-# - stuff in posecells.py
+# why are we moving faster to east than to the other directions?
+# create_experience(), do we need them at all?
+
+# TODO
+# implement the enemy recognition
+
 while True:
     # ======= Image pipeline ======
     start_time = time.time()
-    # Debug
-    frame = IO.get_pixels(scale=screen_size)
+    for i in range(0, 4):
+        frame = IO.get_pixels(scale=screen_size)
     if vo is None:
         vo = VisualOdometry(frame, 5, draw=False)
         speed, angle = 0, 0
@@ -79,9 +84,9 @@ while True:
     # Localization using posecells
     match_id = view_templates.on_image(frame)
     pc.on_view_template(match_id)
-    pc.update()
-    pc.path_integration(speed, angle)
-    pc.plot_posecell_network(fps)
+    global_x, global_y = pc.update(speed, angle)
+    #print(global_x, global_y)
+    pc.plot_posecell_network(fps, view_templates.memory,  global_x, global_y)
     pc_not_updated = True
 
     if agent_active:
@@ -173,11 +178,12 @@ while True:
                 pass
             """
     # ======= Draw the movement vector ==========
-    if draw_movement_vector:
+    if draw_movement_vector and agent_active:
+        f = 80
         x1 = player.x
         y1 = player.y
-        x2 = int(round(x1 - speed * 80 * np.cos(angle)))
-        y2 = int(round(y1 - speed * 80 * np.sin(angle)))
+        x2 = int(round(x1 - speed * f * np.cos(angle)))
+        y2 = int(round(y1 - speed * f * np.sin(angle)))
         frame = cv2.line(frame, (x1, y1), (x2, y2), (0, 255, 0), 3)
     # ======= Write fps ===========
     cycle_time = time.time()-start_time
