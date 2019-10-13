@@ -224,10 +224,10 @@ class Player():
                                   colors[i], -1)
             frame = cv2.putText(frame, self.actions[i], (padding_right+2, 100 + 25 + int((bar_height+10) * i + 2)),
                                 cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 1)
-        # Printout action:
-        frame = cv2.putText(frame, "Selected Action:", (padding_right, 100 + 25 + int((bar_height+10)*(i+1))),
-                            cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-        frame = cv2.putText(frame, self.actions[action], (padding_right, 100 + 25 + int((bar_height+10)*(i+2))),
-                            cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+            # Printout action:
+            frame = cv2.putText(frame, "Selected Action:", (padding_right, 100 + 25 + int((bar_height+10)*(i+1))),
+                                cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+            frame = cv2.putText(frame, self.actions[action], (padding_right, 100 + 25 + int((bar_height+10)*(i+2))),
+                                cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
         return frame
 

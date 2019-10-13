@@ -117,7 +117,7 @@ class PosecellNetwork:
             angle += 2.0 * np.pi
         while angle > 2.0 * np.pi:
             angle -= 2.0 * np .pi
-        print("TODO: {}, {}".format(vtrans, angle))
+        print(vtrans, angle)
         vtrans = (vtrans * time_diff) / self.pc_c_size
 
         if angle == 0:
@@ -144,8 +144,10 @@ class PosecellNetwork:
             pca_new[1:-1, 1:-1] = pca90
 
             weight_sw = (vtrans**2) * np.cos(dir90) * np.sin(dir90)
-            weight_se = vtrans * np.sin(dir90) - (vtrans**2) * np.cos(dir90) * np.sin(dir90)
-            weight_nw = vtrans * np.cos(dir90) - (vtrans**2) * np.cos(dir90) * np.sin(dir90)
+            #weight_se = vtrans * np.sin(dir90) - (vtrans**2) * np.cos(dir90) * np.sin(dir90)
+            #weight_nw = vtrans * np.cos(dir90) - (vtrans**2) * np.cos(dir90) * np.sin(dir90)
+            weight_se = vtrans * np.sin(dir90) * (1 - vtrans * np.cos(dir90))
+            weight_nw = vtrans * np.cos(dir90) * (1 - vtrans * np.sin(dir90))
             weight_ne = 1.0 - weight_sw - weight_se - weight_nw
 
             print(weight_sw, weight_se, weight_nw, weight_ne)

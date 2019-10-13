@@ -21,7 +21,8 @@ ai_view_resolution = int(screen_size[0]/video_to_view_factor), int(screen_size[1
 # If you want to use the webcam as input use:
 #IO = input_output(input_mode='webcam')
 # If you want to use a videofile as input:
-IO = input_output(input_mode='videofile', video_filename='../videos/posecell_test.mp4')
+#IO = input_output(input_mode='videofile', video_filename='../videos/posecell_test.mp4')
+IO = input_output(input_mode='videofile', video_filename='../videos/eval.mp4')
 ####################
 
 LeagueAI = LeagueAIFramework(config_file="../cfg/LeagueAI.cfg", weights="../weights/05_02_LeagueAI/LeagueAI_final.weights",
@@ -36,7 +37,7 @@ class_colors = [(0, 0, 255), (71, 99, 255), (0, 165, 255), (0, 215, 255)]
 
 # Manual Controls
 fps = IO.get_fps()
-agent_active = False
+agent_active = True
 
 # Skip frames of video
 # TOOD move to IO
@@ -72,7 +73,7 @@ draw_movement_vector = True # Agent needs to be active for it to work
 while True:
     # ======= Image pipeline ======
     start_time = time.time()
-    for i in range(0, 4):
+    for i in range(0, 3):
         frame = IO.get_pixels(scale=screen_size)
     if vo is None:
         vo = VisualOdometry(frame, 5, draw=False)
@@ -86,7 +87,7 @@ while True:
     pc.on_view_template(match_id)
     global_x, global_y = pc.update(speed, angle)
     #print(global_x, global_y)
-    pc.plot_posecell_network(fps, view_templates.memory,  global_x, global_y)
+    #pc.plot_posecell_network(fps, view_templates.memory,  global_x, global_y)
     pc_not_updated = True
 
     if agent_active:
@@ -152,11 +153,11 @@ while True:
                 i += 1
             retreat_prob = player.retreat_prob((max(0, min(distances))), player.hp)
             #print("atow: {}, acan: {}, acast: {}, amele: {}, push: {}, retreat: {}".format(attack_tower_prob, attack_canon_prob, attack_caster_prob, attack_melee_prob, push_prob, retreat_prob))
-            #action = player.decide_action(attack_tower_prob, attack_canon_prob, attack_caster_prob,
-            #                              attack_melee_prob, push_prob, retreat_prob)
+            action = player.decide_action(attack_tower_prob, attack_canon_prob, attack_caster_prob,
+                                          attack_melee_prob, push_prob, retreat_prob)
             # Visualize the probabilites
-            #frame = player.show_probs(frame, attack_tower_prob, attack_canon_prob, attack_caster_prob,
-            #                          attack_melee_prob, push_prob, retreat_prob, action)
+            frame = player.show_probs(frame, attack_tower_prob, attack_canon_prob, attack_caster_prob,
+                                      attack_melee_prob, push_prob, retreat_prob, action)
 
             # Execute the action and get the odometry
             """
