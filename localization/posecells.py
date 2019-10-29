@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import time
 import math
+import matplotlib.pyplot as plt
 
 class PosecellVisualTemplate:
     def __init__(self, i, pcvt_x, pcvt_y, decay):
@@ -55,7 +56,7 @@ class PosecellNetwork:
         self.pc_w_i_var = pc_w_i_var
         self.pc_global_inhib = pc_global_inhib
         self.scale_factor = scale_factor # This factor increases the np array for visualization only
-        self.pc_c_size = 0.3 # How large one cell of the network is
+        self.pc_c_size = 0.1175 # How large one cell of the network is (helps you scale the velocity to the map)
         self.map_image = cv2.resize(cv2.imread('graphics/minimap.png'), (self.x_size * scale_factor, self.y_size * scale_factor))
         self.path = []
         self.pc_cells_average = pc_cells_average
@@ -117,7 +118,7 @@ class PosecellNetwork:
             angle += 2.0 * np.pi
         while angle > 2.0 * np.pi:
             angle -= 2.0 * np .pi
-        print(vtrans, angle)
+        #print(vtrans, angle)
         vtrans = (vtrans * time_diff) / self.pc_c_size
 
         if angle == 0:
@@ -150,7 +151,7 @@ class PosecellNetwork:
             weight_nw = vtrans * np.cos(dir90) * (1 - vtrans * np.sin(dir90))
             weight_ne = 1.0 - weight_sw - weight_se - weight_nw
 
-            print(weight_sw, weight_se, weight_nw, weight_ne)
+            #print(weight_sw, weight_se, weight_nw, weight_ne)
 
             pca_new = pca_new * weight_ne + np.roll(pca_new, 1, 1) * weight_nw + \
                                  np.roll(pca_new, 1, 0) * weight_se + \
@@ -244,7 +245,7 @@ class PosecellNetwork:
             for i in range(1, len(self.path)):
                 cv2.line(toprint, self.path[i-1], self.path[i], (0, 0 , 255), 1)
             cv2.line(toprint, self.path[-1], center, (0, 0 , 255), 1)
-        if len(self.path) == 0 or a > 10.0:
+        if len(self.path) == 0 or a > 6.0:
             self.path.append(center)
 
 
@@ -384,6 +385,11 @@ class ViewTemplates:
         return best_match_id, smallest_error
 
 class VisualOdometry:
+    """
+    Notes:
+        - There is substential drift in the visual odometry
+        - The median of the optical flow is maybe not the best solution, filtering out the non majority values could help
+    """
     def __init__(self, frame, scale, draw=True):
         # Parameters for lucas kanade optical flow
         self.size = (int(np.shape(frame)[1]/scale), int(np.shape(frame)[0]/scale))
@@ -396,10 +402,14 @@ class VisualOdometry:
     def get_optical_flow(self, now):
         now = cv2.resize(now, self.size)
         now_gray = cv2.cvtColor(now, cv2.COLOR_RGB2GRAY)
-        flow = cv2.calcOpticalFlowFarneback(self.prev, now_gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+        flow = cv2.calcOpticalFlowFarneback(self.prev, now_gray, None, 0.5, 20, 5, 3, 5, 1.2, 0)
         mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
-        angle = np.mean(ang)
-        speed = np.mean(mag) * 1
+
+        angle = np.median(ang)
+        speed = np.median(mag)
+        # TODO this is not really a nice solution but the velocity left right is higher than up down usually. So i clipped it.
+        if speed > 0.1:
+            speed = 1.0
         if self.draw:
             self.hsv[...,0] = ang * 180 / np.pi / 2
             self.hsv[...,2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)

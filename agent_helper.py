@@ -4,6 +4,9 @@ import math
 import random
 import win32api, win32con
 
+
+from PIL import ImageFont, ImageDraw, Image
+
 class Policy:
     def __init__(self):
         self.theta = np.zeros((4,1))
@@ -29,6 +32,10 @@ class Player():
         self.hp = 100.0
         self.policy = Policy()
         self.actions = ['Attack Tower', 'Attack Canon', 'Attack Caster', 'Attack Melee', 'Pushing', 'Retreating']
+        font_mono = "./fonts/Syne-Mono.ttf"
+        font_regular = "./fonts/Syne-Regular.ttf"
+        self.font40 = ImageFont.truetype(font_regular, 40)
+        self.font30 = ImageFont.truetype(font_regular, 34)
 
     def update(self, xPos, yPos, width, height, confidence, object_class):
         self.x = int(xPos)
@@ -43,29 +50,23 @@ class Player():
         self.object_class = int(object_class)
 
     def click_xy(self, x, y, button):
-        # Move mouse to xy
-        # TODO: Translate
-        win32api.mouse_event(win32con.MOUSEEVENTF_MOVE | win32con.MOUSEEVENTF_ABSOLUTE, int(x / SCREEN_WIDTH * 65535.0),
-                             int(y / SCREEN_HEIGHT * 65535.0))
+        SCREEN_WIDTH = 1920
+        SCREEN_HEIGHT=1080
+        TOP_OFFSET = 20
+        win32api.SetCursorPos((x,y+TOP_OFFSET))
         if button == 0:
             print("Attack Move!")
             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
-        elif button == 0:
-            print("Info!")
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
+        elif button == 1:
+            print("Move!")
+            win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, x, y, 0, 0)
+            win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, x, y, 0, 0)
         elif button == 2:
-            print("Attack!")
+            print("Wheel!")
         else:
-            print("Info!")
+            print("Unknown Button Click!")
         return
-
-    def click_object(self, shortest_list, obj_class, button):
-        """
-        Click a certain xy position
-        :param shortest_list:  list of shortest object for each object class
-        :param obj_class: object class we want to click on
-        :param button:
-        :return:
-        """
 
     def draw_bb(self, frame, color):
         cv2.circle(frame, (self.x, self.y), 5, (255,0,0), -1)
@@ -143,6 +144,9 @@ class Player():
         return cur, cur_min
 
     def attack_prob(self, object_class, shortest_distance, hp):
+        print(shortest_distance)
+        TODO check the functions here
+        """
         if shortest_distance > 0:
             shortest_distance = shortest_distance * 0.0075
             if object_class == 0:
@@ -167,6 +171,7 @@ class Player():
                     return p
         else:
             return 0
+        """
 
     def retreat_prob(self, closest_enemy, hp):
         if closest_enemy > 0:
@@ -202,32 +207,34 @@ class Player():
         return action
 
     def show_probs(self, frame, tower_prob, canon_prob, caster_prob, melee_prob, push_prob, retreat_prob, action):
-        colors = [(0, 0, 255), (0, 0, 255), (0, 0, 255), (0, 0, 255), (255, 0, 0), (255, 0 ,0)]
+        colors = [(0, 0, 255), (0, 0, 255), (0, 0, 255), (0, 0, 255), (255, 0, 0), (255, 0 ,0), (125, 125, 125)]
         input_probs = [tower_prob, canon_prob, caster_prob, melee_prob, push_prob, retreat_prob]
-        probs = []
-        #for i in range(0, len(input_probs)):
-        #   probs.append(float(input_probs[i])/sum(input_probs))
-        #probs = [float(i)/sum(input_probs) for i in input_probs]
+        probs = [0] * len(input_probs)
+        if sum(input_probs) > 0:
+            probs = []
+            for i in range(0, len(input_probs)):
+               probs.append(float(input_probs[i])/sum(input_probs))
         size = (300, 500)
         padding_right = 10
         # Draw rect
-        frame = cv2.rectangle(frame, (0, 0), size, (0,0,0), -1)
-        # Print Title
-        frame = cv2.putText(frame, "Action prob.", (padding_right, 85), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-        # Show probability bars
-        bar_max_size = 200
-        bar_height = 30
+        frame = cv2.rectangle(frame, (0, 0), size, (48, 53, 57), -1)
+        frame = cv2.rectangle(frame, (0, 0), (299, 499), (30, 30, 30), 2)
+        bar_max_size = 280
+        bar_height = 40
         for i in range(0, len(probs)):
             frame = cv2.rectangle(frame, (padding_right, 100 + int((bar_height+10) * i)),
                                   (padding_right + int(bar_max_size*probs[i]),
                                    100 + int((bar_height+10) * i) + bar_height),
                                   colors[i], -1)
-            frame = cv2.putText(frame, self.actions[i], (padding_right+2, 100 + 25 + int((bar_height+10) * i + 2)),
-                                cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 1)
-            # Printout action:
-            frame = cv2.putText(frame, "Selected Action:", (padding_right, 100 + 25 + int((bar_height+10)*(i+1))),
-                                cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-            frame = cv2.putText(frame, self.actions[action], (padding_right, 100 + 25 + int((bar_height+10)*(i+2))),
-                                cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+        img_pil = Image.fromarray(frame)
+        draw = ImageDraw.Draw(img_pil)
+        draw.text((padding_right, 40), "Action probs.", font=self.font40, fill=(255,255,255,255))
+        # Show probability bars
+        for i in range(0, len(probs)):
+            draw.text((padding_right, 100 + int((bar_height+10) * i)), self.actions[i], font=self.font30, fill=(255,255,255,255))
+        draw.text((padding_right, 100 + int((bar_height+10) * (i+1))), "Selected Action:", font=self.font40, fill=(255,255,255,255))
+        draw.text((padding_right, 100 + int((bar_height+10) * (i+2))), self.actions[action], font=self.font40, fill=(255,255,255,255))
+        frame = np.array(img_pil)
+
         return frame
 

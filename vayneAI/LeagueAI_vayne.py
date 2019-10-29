@@ -17,7 +17,7 @@ screen_size = (1920,1080)
 video_to_view_factor = 2
 ai_view_resolution = int(screen_size[0]/video_to_view_factor), int(screen_size[1]/video_to_view_factor)
 # To record the desktop use:
-#IO = input_output(input_mode='desktop', SCREEN_WIDTH=1920, SCREEN_HEIGHT=1130, x=0, y=50)
+#IO = input_output(input_mode='desktop', SCREEN_WIDTH=1920, SCREEN_HEIGHT=1130, x=0, y=20)
 # If you want to use the webcam as input use:
 #IO = input_output(input_mode='webcam')
 # If you want to use a videofile as input:
@@ -27,7 +27,7 @@ IO = input_output(input_mode='videofile', video_filename='../videos/eval.mp4')
 
 LeagueAI = LeagueAIFramework(config_file="../cfg/LeagueAI.cfg", weights="../weights/05_02_LeagueAI/LeagueAI_final.weights",
                              names_file="../cfg/LeagueAI.names", classes_number = 5, resolution=int(960/1.5),
-                             threshold = 0.85, cuda=True, draw_boxes=False)
+                             threshold = 0.90, cuda=True, draw_boxes=False)
 
 player_object_class = 4
 available_objects = [0,1,2,3,4]
@@ -41,7 +41,7 @@ agent_active = True
 
 # Skip frames of video
 # TOOD move to IO
-for i in range(0, 20):
+for i in range(0, 200):
     frame = IO.get_pixels(scale=screen_size)
 
 
@@ -60,23 +60,16 @@ speed, angle = 0, 0
 draw_movement_vector = True # Agent needs to be active for it to work
 
 # TODO
-# - Actuators
-# - Translate the xy click pos to absolute screen pos to click
-
-# TODO
-# why are we moving faster to east than to the other directions?
-# create_experience(), do we need them at all?
-
-# TODO
-# implement the enemy recognition
+# Improve localization with some kind of memory of the map and ground truth positions
+# Improve the pathing by making it relax like the experience map
 
 while True:
     # ======= Image pipeline ======
     start_time = time.time()
-    for i in range(0, 3):
+    for i in range(0, 3): # Careful changing the number of skipped frames here. This is equivalent to scaling the speed of the agent
         frame = IO.get_pixels(scale=screen_size)
     if vo is None:
-        vo = VisualOdometry(frame, 5, draw=False)
+        vo = VisualOdometry(frame, 5, draw=True)
         speed, angle = 0, 0
     else:
         speed, angle = vo.get_optical_flow(frame)
@@ -86,8 +79,8 @@ while True:
     match_id = view_templates.on_image(frame)
     pc.on_view_template(match_id)
     global_x, global_y = pc.update(speed, angle)
-    #print(global_x, global_y)
-    #pc.plot_posecell_network(fps, view_templates.memory,  global_x, global_y)
+    #print("Global pos: ", global_x, global_y)
+    pc.plot_posecell_network(fps, view_templates.memory,  global_x, global_y)
     pc_not_updated = True
 
     if agent_active:
@@ -110,13 +103,30 @@ while True:
                         o.distance = player.get_distance(o)
             # Find closest object of each class
             shortest_list = [] # Stores the closest objects for each class with the nth element corresp. to the nth class
+            shortest_melee = None
+            shortest_canon = None
+            shortest_caster = None
+            shortest_tower = None
+            shortest_overall = None
+            shortest_temp = 1000000
             distances = [-1]*4
             for l in objects_sorted:
                 cur_object_class = l[0].object_class
 
                 if cur_object_class != 4:
                     closest, distance = player.get_shortest(l)
+                    if closest.object_class == 0:
+                        shortest_tower = closest
+                    if closest.object_class == 1:
+                        shortest_canon = closest
+                    if closest.object_class == 2:
+                        shortest_caster = closest
+                    if closest.object_class == 3:
+                        shortest_melee = closest
                     shortest_list.append(closest)
+                    if closest.distance < shortest_temp:
+                        shortest_temp = closest.distance
+                        shortest_overall = closest
                     distances[cur_object_class] = distance
             # Visualize the objects and their distances
             for o in objects_sorted:
@@ -152,6 +162,16 @@ while True:
                     push_prob = 100
                 i += 1
             retreat_prob = player.retreat_prob((max(0, min(distances))), player.hp)
+
+            """
+            attack_melee_prob = 0
+            attack_caster_prob = 0
+            attack_canon_prob = 0
+            attack_tower_prob = 0
+            push_prob = 100
+            retreat_prob = 0
+            """
+
             #print("atow: {}, acan: {}, acast: {}, amele: {}, push: {}, retreat: {}".format(attack_tower_prob, attack_canon_prob, attack_caster_prob, attack_melee_prob, push_prob, retreat_prob))
             action = player.decide_action(attack_tower_prob, attack_canon_prob, attack_caster_prob,
                                           attack_melee_prob, push_prob, retreat_prob)
@@ -162,21 +182,30 @@ while True:
             # Execute the action and get the odometry
             """
             if player.actions[action] ==  'Attack Tower':
-                pass
+                player.click_xy(shortest_tower.x, shortest_tower.y, button=0)
             elif player.actions[action] ==  'Attack Canon':
                 # Left Click the closest Canon minion
-                #player.click_xy(shortest_list, obj_class=1, button=0)
-                pass
+                player.click_xy(shortest_canon.x, shortest_canon.y, button=0)
             elif player.actions[action] ==  'Attack Caster':
-                pass
+                player.click_xy(shortest_caster.x, shortest_caster.y, button=0)
             elif player.actions[action] ==  'Attack Melee':
+                player.click_xy(shortest_melee.x, shortest_melee.y, button=0)
                 pass
             elif player.actions[action] ==  'Pushing':
                 # Move
-                vtrans_x, vtrans_y = 
                 pass
             elif player.actions[action] ==  'Retreating':
-                pass
+                if shortest_overall is not None:
+                    if shortest_overall.x < player.x:
+                        direction_x = 1
+                    elif shortest_overall.x >= player.x:
+                        direction_x = -1
+                    if shortest_overall.y < player.y:
+                        direction_y = 1
+                    elif shortest_overall.y >= player.y:
+                        direction_y = -1
+                    # Run away from the closest enemy
+                    player.click_xy(player.x + 100 * direction_x, player.y + 100 * direction_y, button = 1)
             """
     # ======= Draw the movement vector ==========
     if draw_movement_vector and agent_active:
