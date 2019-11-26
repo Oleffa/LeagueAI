@@ -56,7 +56,7 @@ class PosecellNetwork:
         self.pc_w_i_var = pc_w_i_var
         self.pc_global_inhib = pc_global_inhib
         self.scale_factor = scale_factor # This factor increases the np array for visualization only
-        self.pc_c_size = 0.1175 # How large one cell of the network is (helps you scale the velocity to the map)
+        self.pc_c_size = 0.65#0.37*0.1175 # How large one cell of the network is (helps you scale the velocity to the map)
         self.map_image = cv2.resize(cv2.imread('graphics/minimap.png'), (self.x_size * scale_factor, self.y_size * scale_factor))
         self.path = []
         self.pc_cells_average = pc_cells_average
@@ -227,7 +227,7 @@ class PosecellNetwork:
         self.current_vt = vt
         self.vt_update = True
 
-    def plot_posecell_network(self, fps, memory, global_x, global_y):
+    def plot_posecell_network(self, fps, memory, global_x, global_y, recorder=None):
         toprint = self.map_image.astype(np.float64)
         pcs = np.zeros(toprint.shape, dtype=toprint.dtype)
         pcs[:,:,1] = cv2.resize(self.posecells * 255.0, (int(self.x_size*self.scale_factor),
@@ -247,7 +247,8 @@ class PosecellNetwork:
             cv2.line(toprint, self.path[-1], center, (0, 0 , 255), 1)
         if len(self.path) == 0 or a > 6.0:
             self.path.append(center)
-
+        if recorder is not None:
+            recorder.write(toprint)
 
         cv2.imshow("Posecell Network", toprint)
         cv2.waitKey(int(1000/fps))
@@ -390,7 +391,7 @@ class VisualOdometry:
         - There is substential drift in the visual odometry
         - The median of the optical flow is maybe not the best solution, filtering out the non majority values could help
     """
-    def __init__(self, frame, scale, draw=True):
+    def __init__(self, frame, scale, draw=True, recorder=None):
         # Parameters for lucas kanade optical flow
         self.size = (int(np.shape(frame)[1]/scale), int(np.shape(frame)[0]/scale))
         frame = cv2.resize(frame, self.size)
@@ -398,18 +399,36 @@ class VisualOdometry:
         self.hsv = np.zeros_like(frame)
         self.hsv[...,1] = 255
         self.draw = draw
+        self.speeds = []
+        self.recorder = recorder
 
     def get_optical_flow(self, now):
         now = cv2.resize(now, self.size)
+        #now[50:(216-50),60:(384-60)] = 0
         now_gray = cv2.cvtColor(now, cv2.COLOR_RGB2GRAY)
-        flow = cv2.calcOpticalFlowFarneback(self.prev, now_gray, None, 0.5, 20, 5, 3, 5, 1.2, 0)
+        # This one for normal use
+        # flow = cv2.calcOpticalFlowFarneback(self.prev, now_gray, None, pyr_scale=0.5, levels=1,
+        #                                    winsize=30, iterations=3, poly_n=7, poly_sigma=1.5, flags=0)
+        # This one for recording
+        flow = cv2.calcOpticalFlowFarneback(self.prev, now_gray, None, pyr_scale=0.5, levels=3,
+                                            winsize=15, iterations=3, poly_n=5, poly_sigma=1.0, flags=0)
         mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
 
-        angle = np.median(ang)
-        speed = np.median(mag)
-        # TODO this is not really a nice solution but the velocity left right is higher than up down usually. So i clipped it.
-        if speed > 0.1:
-            speed = 1.0
+        """
+        values, counts = np.unique(np.round(mag, 1).flatten(), return_counts=True)
+        print(values, counts)
+        speed = values[1]
+        angle = 0
+        values, counts = np.unique(np.flatten(np.round(mag, 1)), return_counts=True)
+        
+        
+        print(values, counts)
+        values, counts = np.unique(np.round(ang, 1), return_counts=True)
+        angle = np.median(values)
+        """
+
+        angle = np.median(ang)# angle
+        speed = np.median(mag) # mag
         if self.draw:
             self.hsv[...,0] = ang * 180 / np.pi / 2
             self.hsv[...,2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)
@@ -421,7 +440,11 @@ class VisualOdometry:
             bgr = cv2.line(bgr, (x1, y1), (x2, y2), (255, 255, 255), 2)
             cv2.imshow('frame', bgr)
             cv2.waitKey(30) & 0xff
+
         self.prev = now_gray
+        speed += np.abs(np.sin(angle) * 1.0)
+        if self.recorder is not None:
+            self.recorder.write(bgr)
         return speed, angle
 
 

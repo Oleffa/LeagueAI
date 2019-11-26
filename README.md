@@ -1,6 +1,8 @@
 # LeagueAI
 Implementation of an A.I. Player for the videogame League of Legends based on Image Recognition using PyTorch
 
+New Demo video: https://youtu.be/iB4PoNJuXzc
+
 Attention: The old version can be found in the branch "LeagueAI_2017".
 
 Attention: This project is still under development, the datasets I generate and the YOLOv3 object detection weights I trained will be made available soon! Meanwhile check out the included report on how to generate synthetic training data for League of Legends.

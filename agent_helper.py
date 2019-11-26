@@ -49,24 +49,27 @@ class Player():
         self.confidence = confidence
         self.object_class = int(object_class)
 
-    def click_xy(self, x, y, button):
-        SCREEN_WIDTH = 1920
-        SCREEN_HEIGHT=1080
-        TOP_OFFSET = 20
-        win32api.SetCursorPos((x,y+TOP_OFFSET))
-        if button == 0:
-            print("Attack Move!")
-            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
-            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
-        elif button == 1:
-            print("Move!")
-            win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, x, y, 0, 0)
-            win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, x, y, 0, 0)
-        elif button == 2:
-            print("Wheel!")
+    def click_xy(self, xy, button):
+        x = xy[0]
+        y = xy[1]
+        top_offset= 20
+        # Debug flag to turn off clicks
+        click = True
+        if click:
+            win32api.SetCursorPos((x,y+top_offset))
+            if button == 0:
+                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
+                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
+            elif button == 1:
+                win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, x, y, 0, 0)
+                win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, x, y, 0, 0)
+            elif button == 2:
+                print("Wheel!")
+            else:
+                print("Unknown Button Click!")
+            return
         else:
-            print("Unknown Button Click!")
-        return
+            return
 
     def draw_bb(self, frame, color):
         cv2.circle(frame, (self.x, self.y), 5, (255,0,0), -1)
@@ -74,10 +77,10 @@ class Player():
         return frame
 
     def compute_hp(self, frame, draw_hp_box):
-        width = 415
-        x_offset = 71
-        height = 15
-        bottom_offset = 50
+        width = 345
+        x_offset = 58
+        height = 13
+        bottom_offset = 42
         x_center = np.shape(frame)[1]/2 - x_offset
         y_center = np.shape(frame)[0] - bottom_offset
         hp_x_min = int(x_center-width/2)
@@ -142,71 +145,41 @@ class Player():
                 cur_min = d
                 cur = o
         return cur, cur_min
+    def move_towards(self, closest_overall):
+        print("Move to")
+        x_diff = max(0, (closest_overall.x - self.x)/3)
+        y_diff = max(0, (closest_overall.y - self.y)/3)
+        self.click_xy((self.x + int(x_diff), self.y + int(y_diff)), button=1)
 
-    def attack_prob(self, object_class, shortest_distance, hp):
-        print(shortest_distance)
-        TODO check the functions here
+    def kite_away_from(self, closest_overall):
+        print("Kiting")
         """
-        if shortest_distance > 0:
-            shortest_distance = shortest_distance * 0.0075
-            if object_class == 0:
-                p = self.policy.theta[0][0] * hp * (1 / (1 + math.exp(-2 * (shortest_distance + 2))) -
-                                            1 / (1 + math.exp(-2 * (shortest_distance - 4.6))))
-                p /= 94.78
-                if p > 1:
-                    return 1
-                elif p < 0:
-                    return 0
-                else:
-                    return p
-            if object_class == 1 or object_class == 2 or object_class == 3:
-                p = self.policy.theta[1][0] * hp * (1 / (1 + math.exp(-2 * (shortest_distance - 3))) -
-                                            1 / (1 + math.exp(-3 * (shortest_distance - 6))))
-                p /= 94.78
-                if p > 1:
-                    return 1
-                elif p < 0:
-                    return 0
-                else:
-                    return p
-        else:
-            return 0
+        This function returns the point to click in order to kite away from the cloesest enemy
+        :param closest_overall: The closest enemy object
+        :return: xy position of the click
         """
+        direction_x = 0
+        direction_y = 0
+        if closest_overall.x < self.x:
+            direction_x = 1
+        elif closest_overall.x >= self.x:
+            direction_x = -1
+        if closest_overall.y < self.y:
+            direction_y = 1
+        elif closest_overall.y >= self.y:
+            direction_y = -1
+        self.click_xy((self.x + 150 * direction_x, self.y + 150 * direction_y), button=1)
 
-    def retreat_prob(self, closest_enemy, hp):
-        if closest_enemy > 0:
-            x = hp * self.policy.theta[2][0]
-            x2 = closest_enemy * self.policy.theta[2][0]
-            p = 1-(0.5 * math.log((x2+1), 5000)) - (0.5 * (x/100.0))
-            if p > 1:
-                return 1
-            elif p < 0:
-                return 0
-            else:
-                return p
-        else:
-            return 0
+    def push_mid(self):
+        print("Pushing")
+        self.click_xy((self.x + 400, self.y - 300), button=1)
 
-    def decide_action(self, tower_prob, canon_prob, caster_prob, melee_prob, push_prob, retreat_prob):
-        probs = [tower_prob, canon_prob, caster_prob, melee_prob, push_prob, retreat_prob]
-        actions = np.arange(0, len(probs), 1)
-        cutoffs = []
-        for i in range(0, len(probs)):
-            if sum(probs) <= 0:
-                cutoffs.append(0)
-            else:
-                cutoffs.append(sum(probs[:i+1])/sum(probs))
-
-        rnd = random.random()
-        # -1 do nothing
-        action = -1
-        for i in range(0, len(cutoffs)):
-            if rnd < cutoffs[i]:
-                action = actions[i]
-                break
-        return action
+    def attack(self, target):
+        print("Attacking")
+        self.click_xy((target.x, target.y), button=0)
 
     def show_probs(self, frame, tower_prob, canon_prob, caster_prob, melee_prob, push_prob, retreat_prob, action):
+        print("Deprecated")
         colors = [(0, 0, 255), (0, 0, 255), (0, 0, 255), (0, 0, 255), (255, 0, 0), (255, 0 ,0), (125, 125, 125)]
         input_probs = [tower_prob, canon_prob, caster_prob, melee_prob, push_prob, retreat_prob]
         probs = [0] * len(input_probs)
